@@ -1,7 +1,6 @@
-# SUPERHARD \n
+# SUPERHARD
 
 ## Proyecto de E-Commerce
-<br>
 
 ### TUP - UTN FRM
 
