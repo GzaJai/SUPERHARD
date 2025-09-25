@@ -5,7 +5,6 @@ import Header from '../Header'
 const Home = () => {
   return (
     <div className="flex flex-col min-h-screen w-screen bg-neutral-900 text-white">
-      <Header />
       <main className="flex-1 p-5">
         <Carousel />
 
