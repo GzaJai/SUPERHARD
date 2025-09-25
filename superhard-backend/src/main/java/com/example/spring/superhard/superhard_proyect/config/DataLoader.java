@@ -26,9 +26,9 @@ public class DataLoader implements CommandLineRunner {
         productoRepository.deleteAll();
         usuarioRepository.deleteAll();
         // Productos de ejemplo para verificar el funcionamiento del programa y la conexión con la base de datos
-        productoRepository.save(new ProductoModel(null, "Ryzen 5", 134999.0, "Procesadores", 10));
-        productoRepository.save(new ProductoModel(null, "Intel i5", 120000.0, "Procesadores", 8));
-        productoRepository.save(new ProductoModel(null, "RTX 4060", 350000.0, "Placas de video", 5));
+        productoRepository.save(new ProductoModel(null, "Ryzen 5", 134999.0, "Procesadores", 10, null));
+        productoRepository.save(new ProductoModel(null, "Intel i5", 120000.0, "Procesadores", 8, null));
+        productoRepository.save(new ProductoModel(null, "RTX 4060", 350000.0, "Placas de video", 5, null));
         Direccion_Usuario direccion = new Direccion_Usuario("calle falsa", "123", "Mendoza", "Argentina", "5500");
         usuarioRepository.save(new UsuarioModel(null, "Juan", "Perez", "Juanpi@gmail.com", "2615847632", direccion ,"102030")); 
         System.out.println("Productos de ejemplo cargados en la base de datos.");
