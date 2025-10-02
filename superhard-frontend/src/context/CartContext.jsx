@@ -11,11 +11,35 @@ export function CartProvider({ children }) {
     }, [cart])
 
     const addToCart = (product) => {
-        setCart((prev) => [...prev, product]);
+        setCart(prevCart => {
+            const existingProduct = prevCart.find((item) => item.id == product.id)
+            
+            if (existingProduct) {
+                return prevCart.map(item =>                    
+                    item.id == product.id
+                        ? { ...item, cantidad: item.cantidad + 1 }
+                        : item
+                );
+            } else {
+                return [...prevCart, { ...product, cantidad: 1 }];
+            }
+        });        
     };
     
-    const removeFromCart = () => {
-        setCart((prev) => prev.filter(item => item.id !== id));
+    const removeFromCart = (product) => {
+        setCart((prevCart) => {
+            const existingProduct = prevCart.find((item) => item.id == product.id)
+
+            if (existingProduct.cantidad == 1) {
+                return prevCart.filter(item => item.id !== product.id)
+            } else {
+                return prevCart.map((item) => 
+                    item.id == product.id
+                        ? { ...item, cantidad: item.cantidad -1 }
+                        : item
+                )
+            }
+        })
     };
     
     return (
