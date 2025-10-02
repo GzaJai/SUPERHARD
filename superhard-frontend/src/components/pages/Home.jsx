@@ -9,7 +9,6 @@ const Home = () => {
       <main className="flex-1 p-5">
         <Banner imgPath={ImagenPrincipal} />
         <Carousel />
-
         <h2>Contenido principal de la página</h2>
       </main>
     </div>

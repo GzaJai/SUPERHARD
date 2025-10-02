@@ -19,6 +19,7 @@ public class ProductoModel {
     private Double precio;
     private String categoria;
     private int stock;
+    private String image;
     
 
 }

@@ -17,7 +17,7 @@ class SuperhardProyectApplicationTests {
     
     @Test
     void testGuardarYBuscarProducto() {
-        ProductoModel p = new ProductoModel(null, "Ryzen 5", 134999.0, "Procesadores", 10);
+        ProductoModel p = new ProductoModel(null, "Ryzen 5", 134999.0, "Procesadores", 10, null);
         ProductoModel guardado = productoRepository.save(p);
 
         assertThat(guardado.getId()).isNotNull();

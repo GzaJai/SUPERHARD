@@ -18,6 +18,6 @@ public class UsuarioModel {
     private String telefono;
     private Direccion_Usuario direccion;
     private String password;
-
+    private Rol rol;
 
 }
