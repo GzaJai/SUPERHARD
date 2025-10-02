@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { productos } from '../../data/products';
+import CartContext from '../../context/CartContext';
 
 const ProductDetails = () => {
     const [product, setProduct] = useState();
     const { id } = useParams();
+    const { addToCart } = useContext(CartContext);
 
     useEffect(() => {
         setProduct(productos.find(p => p.id == id))
     }, [])
-    
     
   return (
     <div className="flex flex-col h-dvh bg-[#494949] text-white items-center">
@@ -22,7 +23,12 @@ const ProductDetails = () => {
                         <p className='text-3xl font-bold'>{product.precio}</p>
                     </div>
                     <div>
-                        <button className='p-[1rem] font-bold text-lg text-black bg-[#EEDA00] rounded-lg cursor-pointer'>Agregar al carrito</button>
+                        <button 
+                            className='p-[1rem] font-bold text-lg text-black bg-[#EEDA00] rounded-lg cursor-pointer'
+                            onClick={() => addToCart(product)}
+                            >
+                                Agregar al carrito
+                        </button>
                     </div>
                 </div>
                 <div className='mt-10 pb-10 w-full px-10 bg-[#3E3E3E] rounded-lg'>
