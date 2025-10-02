@@ -1,9 +1,8 @@
-import { useState, useEffect, useContext } from "react";
+import { useContext } from "react";
 import CartContext from "../../context/CartContext";
 import { toInt } from "../../utils/FormatUtils";
 
 const ShoppingCart = () => {
-  const [products, setProducts] = useState([]);
   const { cart, addToCart, removeFromCart } = useContext(CartContext);
 
   return (
