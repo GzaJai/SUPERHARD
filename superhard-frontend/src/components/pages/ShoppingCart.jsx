@@ -3,30 +3,6 @@ import { useState, useEffect } from "react"
 const ShoppingCart = () => {
     const [products, setProducts] = useState([])
 
-    const testProducts = [
-        {
-            id: 1,
-            nombre: "Mouse Gamer Logitech",
-            precio: 45.99,
-            categoria: "Periféricos",
-            cantidad: 2
-        },
-        {
-            id: 2,
-            nombre: "Teclado Mecánico Corsair",
-            precio: 120.50,
-            categoria: "Periféricos",
-            cantidad: 1
-        },
-        {
-            id: 3,
-            nombre: "Disco SSD Samsung 1TB",
-            precio: 150.00,
-            categoria: "Almacenamiento",
-            cantidad: 3
-        }
-    ];
-
     useEffect(() => {
         setProducts(testProducts)
     }, [])
