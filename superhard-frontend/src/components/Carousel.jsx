@@ -7,6 +7,7 @@ import Rysen9 from "../assets/images/Ryzen-9-5900X.jpg";
 
 
 import "./Carousel.css";
+import { Link } from "react-router-dom";
 
 export default function Carousel() {
   // Productos de ejemplo
@@ -81,9 +82,12 @@ export default function Carousel() {
       <h3 className="text-sm font-bold">{p.nombre}</h3>
       <p className="text-yellow-400 font-bold">{p.precio}</p>
       <p className="text-xs text-gray-300">Mismo precio en 6 cuotas fijas!</p>
+
+      <Link to={"/ProductDetail"} >
       <button className="mt-2 bg-yellow-400 text-black px-3 py-1 rounded font-bold hover:bg-yellow-500">
         Ver Producto
       </button>
+      </Link>
     </div>
   ))}
 </div>
