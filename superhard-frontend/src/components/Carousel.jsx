@@ -45,9 +45,9 @@ export default function Carousel() {
       <h3 className="text-sm font-bold">{p.nombre}</h3>
       <p className="text-yellow-400 font-bold">{p.precio}</p>
       <p className="text-xs text-gray-300">Mismo precio en 6 cuotas fijas!</p>
-      <button className="mt-2 bg-yellow-400 text-black px-3 py-1 rounded font-bold hover:bg-yellow-500">
+      <Link to={'product/' + p.id} className="mt-2 bg-yellow-400 text-black px-3 py-1 rounded font-bold hover:bg-yellow-500">
         Ver Producto
-      </button>
+      </Link>
     </div>
   ))}
 </div>

@@ -1,4 +1,4 @@
-import React, { use, useEffect } from "react";
+import React, { useEffect } from "react";
 import Header from "./components/Header";
 import Carousel from "./components/Carousel";
 import "./index.css";
@@ -12,17 +12,14 @@ export default function App() {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
-    }, []);
+  }, []);
 
   return (
-<<<<<<< HEAD
     <CartProvider>
-      <AppRouter />
+      <AppRouter user={user} setUser={setUser} />
     </CartProvider>
-=======
-    <AppRouter user={user} setUser={setUser}/>
->>>>>>> main
   );
 }
+
 
 
