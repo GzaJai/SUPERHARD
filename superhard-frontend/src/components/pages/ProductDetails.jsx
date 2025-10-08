@@ -21,7 +21,7 @@ const ProductDetails = () => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#494949] text-white">
       {product &&
-        <div className="flex flex-col md:flex-row bg-[#313131] rounded-[5px] p-6 w-3/4 max-w-5xl shadow-lg gap-8">
+        <div className="flex flex-col md:flex-row bg-[#313131] rounded-[15px] mt-20 mb-20 p-6 w-3/4 max-w-5xl shadow-lg gap-8">
 
           {/* Imagen del producto */}
           <div className="flex justify-center items-center w-full md:w-1/2">

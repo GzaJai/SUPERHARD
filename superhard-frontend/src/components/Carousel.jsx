@@ -14,7 +14,7 @@ function Carousel() {
   };
 
   return (
-    <div className="bg-[#3E3E3E] text-white py-6 px-6 rounded-lg mt-10 mx-auto max-w-7xl shadow-md">
+    <div className="bg-[#3E3E3E] text-white py-6 px-6 rounded-lg mt-10 mb-10 mx-auto max-w-7xl shadow-md">
       {/* Título */}
       <h2 className="text-2xl font-bold text-[#EEDA00] mb-5 text-center">
         ¡Más vendidos!
@@ -24,9 +24,9 @@ function Carousel() {
         {/* Botón izquierdo */}
         <button
           onClick={prevSlide}
-          className="absolute left-2 md:left-4 bg-[#EEDA00] text-black rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg hover:opacity-80 transition cursor-pointer"
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white text-3xl w-14 h-14 flex items-center justify-center rounded-full hover:bg-[#292929] shadow-lg transition-all duration-300"
         >
-          ◀
+          ‹
         </button>
 
         {/* Contenedor del carrusel */}
@@ -34,7 +34,7 @@ function Carousel() {
           {productos.map((p) => (
             <div
               key={p.id}
-              className="min-w-[180px] max-w-[180px] bg-[#2F2F2F] rounded-lg p-3 flex flex-col justify-center items-center flex-shrink-0 shadow hover:shadow-lg hover:scale-[1.02] transition-transform duration-300"
+              className="min-w-[180px] max-w-[180px] bg-[#2F2F2F] rounded-lg p-3 flex flex-col justify-center items-center flex-shrink-0 shadow hover:shadow-lg hover:scale-[1.01] transition-transform duration-300"
             >
               <img
                 src={p.img}
@@ -62,9 +62,9 @@ function Carousel() {
         {/* Botón derecho */}
         <button
           onClick={nextSlide}
-          className="absolute right-2 md:right-4 bg-[#EEDA00] text-black rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg hover:opacity-80 transition cursor-pointer"
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white text-3xl w-14 h-14 flex items-center justify-center rounded-full hover:bg-[#292929] shadow-lg transition-all duration-300"
         >
-          ▶
+          ›
         </button>
       </div>
     </div>

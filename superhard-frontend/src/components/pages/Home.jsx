@@ -8,7 +8,7 @@ import SeccionCategorias from '../SeccionCategorias.JSX';
 const Home = () => {
   return (
 
-    <div className="flex flex-col h-100% w-100%  bflex flex-col min-h-screen bg-[#494949] text-whiteg-neutral-900 text-white">
+    <div className="flex flex-col h-100% w-100% min-w-screen  bflex flex-col min-h-screen bg-[#494949] text-whiteg-neutral-900 text-white">
       <main className="flex-grow">
         <Banner imgPath={ImagenPrincipal} />
         <Carousel />
