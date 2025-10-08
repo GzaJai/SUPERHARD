@@ -19,9 +19,9 @@ const ProductDetails = () => {
   }, [])
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-neutral-900 text-white">
+    <div className="flex justify-center items-center min-h-screen bg-[#494949] text-white">
       {product &&
-        <div className="flex flex-col md:flex-row bg-[#3E3E3E] rounded-2xl p-6 w-3/4 max-w-5xl shadow-lg gap-8">
+        <div className="flex flex-col md:flex-row bg-[#313131] rounded-[5px] p-6 w-3/4 max-w-5xl shadow-lg gap-8">
 
           {/* Imagen del producto */}
           <div className="flex justify-center items-center w-full md:w-1/2">
@@ -38,6 +38,8 @@ const ProductDetails = () => {
               {product.nombre}
             </h2>
             <p className="text-2xl font-semibold">{product.precio}</p>
+
+            <p className="text-sm text-gray-300">🚚 Envíos a todo el país</p>
 
             <div className="flex flex-col items-rigth gap-3">
 
@@ -67,7 +69,6 @@ const ProductDetails = () => {
                 </button>
               </div>
 
-              <p className="text-sm text-gray-300">🚚 Envíos a todo el país</p>
 
               {/* Boton de comprar */}
               <button className="bg-[#EEDA00] text-black font-bold py-2 px-4 rounded-lg hover:cursor-pointer opacity-90 transition">
@@ -76,7 +77,7 @@ const ProductDetails = () => {
 
               {/* Botón Agregar al Carrito */}
               <button className="bg-[#EEDA00] text-black font-bold py-2 px-4 rounded-lg hover:cursor-pointer opacity-90 transition"
-                onClick={() => addToCart(product)}
+                onClick={() => addToCart(product,cantidad)}
               >
                 Agregar al carrito
               </button>

@@ -1,6 +1,5 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import Footer from '../Footer'
 
 const Login = () => {
   return (<div className='bg-[#494949] w-dvw h-dvh pt-[5rem]'>
@@ -18,8 +17,6 @@ const Login = () => {
             Ingresar
         </button>
     </div>
-
-    <Footer />
 </div>
 
   )

@@ -3,13 +3,18 @@ import Carousel from '../Carousel'
 import Banner from '../Banner'
 import ImagenPrincipal from "../../assets/images/Imagen principal.png";
 import Footer from '../Footer';
+import SeccionCategorias from '../SeccionCategorias.JSX';
 
 const Home = () => {
   return (
-      <div className="flex-grow">
+
+    <div className="flex flex-col h-100% w-100%  bflex flex-col min-h-screen bg-[#494949] text-whiteg-neutral-900 text-white">
+      <main className="flex-grow">
         <Banner imgPath={ImagenPrincipal} />
         <Carousel />
-      </div>
+      </main>
+    </div>
+
 
   )
 }

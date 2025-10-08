@@ -14,16 +14,12 @@ const AppRouter = () => {
       <Header />
 
 
-    <div className="flex flex-col h-100% w-100%  bflex flex-col min-h-screen bg-[#494949] text-whiteg-neutral-900 text-white">
-      <main className="flex-grow">
         <Routes>
             <Route path='/' element={<Home />} />
             <Route path='/shopping-cart' element={<ShoppingCart />} />
             <Route path='/product/:id' element={<ProductDetails />} />
             <Route path='/login' element={<Login />} />
         </Routes>
-      </main>
-    </div>
 
        <Footer />
     </Router>
