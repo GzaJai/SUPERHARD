@@ -29,8 +29,9 @@ export default function Carousel() {
         <button className="carousel-btn left" onClick={prevSlide}>
           ◀
         </button>
+      <div/>  
 
-       <div className="flex gap-4 overflow-x-auto px-4 no-scrollbar">
+      <div className="flex gap-4 overflow-x-auto px-4 no-scrollbar">
   {productos.map((p) => (
     <div
         key={p.id}

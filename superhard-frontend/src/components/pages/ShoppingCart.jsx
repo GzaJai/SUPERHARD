@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import CartContext from "../../context/CartContext";
 import { toInt } from "../../utils/FormatUtils";
+import Footer from "../Footer";
 
 const ShoppingCart = () => {
   const { cart, addToCart, removeFromCart } = useContext(CartContext);
@@ -55,6 +56,7 @@ const ShoppingCart = () => {
           ))}
       </div>
     </div>
+
   );
 };
 

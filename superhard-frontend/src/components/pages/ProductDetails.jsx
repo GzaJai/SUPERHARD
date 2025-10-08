@@ -2,51 +2,113 @@ import { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { productos } from '../../data/products';
 import CartContext from '../../context/CartContext';
+import Footer from '../Footer';
 
 const ProductDetails = () => {
-    const [product, setProduct] = useState();
-    const { id } = useParams();
-    const { addToCart } = useContext(CartContext);
+  const [cantidad, setCantidad] = useState(1);
+  const [product, setProduct] = useState();
+  const { id } = useParams();
+  const { addToCart } = useContext(CartContext);
+  const increase = () => setCantidad(prev => prev + 1);
+  const decrease = () => {
+    if (cantidad > 1) setCantidad(prev => prev - 1);
+  };
 
-    useEffect(() => {
-        setProduct(productos.find(p => p.id == id))
-    }, [])
-    
+  useEffect(() => {
+    setProduct(productos.find(p => p.id == id))
+  }, [])
+
   return (
-    <div className="flex flex-col h-dvh bg-[#494949] text-white items-center">
-        {product && 
-            <div className='flex flex-col pt-10 w-2/3 justify-around items-center'>
-                <div className='flex justify-between items-center'>
-                    <img className='w-1/5 rounded-xl' src={product.img} alt="" />
-                    <div className='flex flex-col w-auto items-center gap-[2rem]'>
-                        <p className='text-2xl font-semibold'>{product.nombre}</p>
-                        <p className='text-3xl font-bold'>{product.precio}</p>
-                    </div>
-                    <div>
-                        <button 
-                            className='p-[1rem] font-bold text-lg text-black bg-[#EEDA00] rounded-lg cursor-pointer'
-                            onClick={() => addToCart(product)}
-                            >
-                                Agregar al carrito
-                        </button>
-                    </div>
+    <div className="flex justify-center items-center min-h-screen bg-neutral-900 text-white">
+      {product &&
+        <div className="flex flex-col md:flex-row bg-[#3E3E3E] rounded-2xl p-6 w-3/4 max-w-5xl shadow-lg gap-8">
+
+          {/* Imagen del producto */}
+          <div className="flex justify-center items-center w-full md:w-1/2">
+            <img
+              src={product.img}
+              alt="Producto"
+              className="rounded-xl object-cover w-full max-w-[400px]"
+            />
+          </div>
+
+          {/* Información del producto */}
+          <div className="flex flex-col w-full md:w-1/2 gap-4">
+            <h2 className="text-3xl font-bold text-[#EEDA00]">
+              {product.nombre}
+            </h2>
+            <p className="text-2xl font-semibold">{product.precio}</p>
+
+            <div className="flex flex-col items-rigth gap-3">
+
+              <div className="flex items-center bg-[#2F2F2F] rounded-md w-full">
+                {/* Botón - */}
+                <button
+                  onClick={decrease}
+                  className="flex-[1] bg-[#EEDA00] text-black font-bold py-2 rounded-l-md cursor-pointer hover:opacity-80 transition"
+                >
+                  -
+                </button>
+
+                {/* Cantidad */}
+                <input
+                  type="text"
+                  value={cantidad}
+                  readOnly
+                  className="flex-[3] text-center bg-white text-black font-semibold outline-none border-none cursor-pointer select-none py-2"
+                />
+
+                {/* Botón + */}
+                <button
+                  onClick={increase}
+                  className="flex-[1] bg-[#EEDA00] text-black font-bold py-2 rounded-r-md cursor-pointer hover:opacity-80 transition"
+                >
+                  +
+                </button>
+              </div>
+
+              <p className="text-sm text-gray-300">🚚 Envíos a todo el país</p>
+
+              {/* Boton de comprar */}
+              <button className="bg-[#EEDA00] text-black font-bold py-2 px-4 rounded-lg hover:cursor-pointer opacity-90 transition">
+                Comprar
+              </button>
+
+              {/* Botón Agregar al Carrito */}
+              <button className="bg-[#EEDA00] text-black font-bold py-2 px-4 rounded-lg hover:cursor-pointer opacity-90 transition"
+                onClick={() => addToCart(product)}
+              >
+                Agregar al carrito
+              </button>
+
+              {/* Tabs */}
+              <div className="mt-6">
+                <div className="flex">
+                  <button className="w-full font-semibold border-b-2 border-[#EEDA00] text-[#EEDA00]" >
+                    Especificaciones
+                  </button>
                 </div>
-                <div className='mt-10 pb-10 w-full px-10 bg-[#3E3E3E] rounded-lg'>
-                    <p className='text-2xl py-10 '><span className='font-bold'>Descripción: </span>{product.descripcion}</p>
-                {product.specs && (
-                    <>
-                        <h3 className='text-2xl font-bold'>Especificaciones: </h3>
-                        {Object.entries(product.specs).map(([key, value]) => (
-                            <p key={key} className='text-lg'>
-                            <span className='font-semibold'>{key.replace(/([A-Z])/g, ' $1').toUpperCase()}:</span> {value}
-                        </p>
-                        ))}
-                    </>
-                )}
-                </div>
+              </div>
+
+              {product.specs && (
+                <ul className="list-disc list-inside text-white">
+                  {Object.entries(product.specs).map(([key, value]) => (
+                    <li key={key}>
+                      <span className="font-regular">
+                        {key.replace(/([A-Z])/g, ' $1').toUpperCase()}:
+                      </span>{" "}
+                      {value}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-        }
+          </div>
+        </div>
+      }
     </div>
+
+      
   )
 }
 
