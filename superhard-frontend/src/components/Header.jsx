@@ -14,7 +14,8 @@ export default function Header({ user, setUser }) {
 
   return (
     <>
-      <header className="w-full border-gray-300 bg-black italic text-white">
+      <header className="sticky top-0 z-50 bg-black text-white italic">
+
         {/* --- Fila superior: logo, buscador, botones --- */}
         <div className="flex flex-col md:flex-row py-[.6rem] px-[1rem] justify-between items-center gap-4 md:gap-0">
 
@@ -68,9 +69,12 @@ export default function Header({ user, setUser }) {
             ) : (
               <>
                 {user.rol === "ADMIN" && (
-                  <button className="flex px-3 py-1 rounded hover:bg-blue-500 gap-1">
-                    Menu de Admin
-                  </button>
+                  <Link
+                    to={"/admin/products"}
+                    className="flex px-3 py-1 rounded hover:bg-orange-500 gap-1"
+                  >
+                    Menu Admin
+                  </Link>
                 )}
                 <button
                   className="flex px-3 py-1 rounded hover:bg-orange-500 gap-1"

@@ -8,7 +8,7 @@ import com.example.spring.superhard.superhard_proyect.service.UsuarioService;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:5173")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -27,12 +27,12 @@ public class UsuarioController {
         return usuarioService.guardaUsuario(usuario);
     }
 
-    @PutMapping("/{id}")
+    @GetMapping("/{id}")
     public UsuarioModel obtieneUsuarioPorId(@PathVariable Long id) {
         return usuarioService.obtieneUsuarioPorId(id);
     }
 
-    @GetMapping("/{id}")
+    @PutMapping("/{id}")
     public UsuarioModel actualizaUsuario(@PathVariable Long id, @RequestBody UsuarioModel usuario) {
         return usuarioService.actualizaUsuario(id, usuario);
     }
