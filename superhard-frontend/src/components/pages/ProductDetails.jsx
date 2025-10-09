@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { productos } from '../../data/products';
 import CartContext from '../../context/CartContext';
+import SpecsSeccion from "../SpecsSeccion";
 
 const ProductDetails = () => {
   const [cantidad, setCantidad] = useState(1);
@@ -19,7 +20,7 @@ const ProductDetails = () => {
   }, [id]);
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-[#494949] text-white">
+    <div className="flex flex-col justify-center items-center min-h-screen bg-[#494949] text-white">
       {product && (
         <div className="flex flex-col md:flex-row bg-[#313131] shadow-[0_0_10px_rgba(0,0,0,0.7)] mt-20 mb-20 p-8 w-[85%] max-w-5xl h-[600px] shadow-2xl gap-10">
 
@@ -82,11 +83,8 @@ const ProductDetails = () => {
             </div>
           </div>
         </div>
-
-
       )}
-
-
+      <SpecsSeccion productId={parseInt(id)} />;
     </div>
   );
 };
