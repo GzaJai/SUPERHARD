@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { productos } from "../data/products";
 import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 function Carousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -14,7 +15,7 @@ function Carousel() {
   };
 
   return (
-    <div className="bg-[#3E3E3E] text-white py-6 px-6 rounded-lg mt-10 mb-10 mx-auto max-w-7xl shadow-md">
+    <div className="bg-[#3E3E3E] text-white py-6 px-6 min-w-screen max-w-screen mt-10 mb-10 mx-auto max-w-7xl shadow-md">
       {/* Título */}
       <h2 className="text-2xl font-bold text-[#EEDA00] mb-5 text-center">
         ¡Más vendidos!
@@ -24,9 +25,9 @@ function Carousel() {
         {/* Botón izquierdo */}
         <button
           onClick={prevSlide}
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white text-3xl w-14 h-14 flex items-center justify-center rounded-full hover:bg-[#292929] shadow-lg transition-all duration-300"
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white w-14 h-14 flex items-center justify-center rounded-full hover:bg-[#505050] shadow-lg transition-all duration-300 cursor-pointer"
         >
-          ‹
+          <ChevronLeft className="w-8 h-8" />
         </button>
 
         {/* Contenedor del carrusel */}
@@ -55,16 +56,15 @@ function Carousel() {
                 Ver Producto
               </Link>
             </div>
-
           ))}
         </div>
 
         {/* Botón derecho */}
         <button
           onClick={nextSlide}
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white text-3xl w-14 h-14 flex items-center justify-center rounded-full hover:bg-[#292929] shadow-lg transition-all duration-300"
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white w-14 h-14 flex items-center justify-center rounded-full hover:bg-[#505050] shadow-lg transition-all duration-300 cursor-pointer"
         >
-          ›
+          <ChevronRight className="w-8 h-8" />
         </button>
       </div>
     </div>

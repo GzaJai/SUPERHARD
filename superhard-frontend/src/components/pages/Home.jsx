@@ -2,8 +2,6 @@ import React from 'react'
 import Carousel from '../Carousel'
 import Banner from '../Banner'
 import ImagenPrincipal from "../../assets/images/Imagen principal.png";
-import Footer from '../Footer';
-import SeccionCategorias from '../SeccionCategorias.JSX';
 
 const Home = () => {
   return (
