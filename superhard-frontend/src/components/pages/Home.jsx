@@ -5,13 +5,15 @@ import ImagenPrincipal from "../../assets/images/Imagen principal.png";
 
 const Home = () => {
   return (
-    <div className="flex flex-col h-dvh bg-neutral-900 text-white">
-      <main className="flex-1 p-5">
+
+    <div className="flex flex-col h-100% w-100% min-w-screen  bflex flex-col min-h-screen bg-[#494949] text-whiteg-neutral-900 text-white">
+      <main className="flex-grow">
         <Banner imgPath={ImagenPrincipal} />
         <Carousel />
-        <h2>Contenido principal de la página</h2>
       </main>
     </div>
+
+
   )
 }
 

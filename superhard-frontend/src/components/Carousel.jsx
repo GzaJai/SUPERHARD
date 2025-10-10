@@ -1,62 +1,74 @@
 import React, { useState } from "react";
 import { productos } from "../data/products";
-
-
-import "./Carousel.css";
 import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export default function Carousel() {
-
+function Carousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const prevSlide = () => {
-    setCurrentIndex((prev) =>
-      prev === 0 ? productos.length - 1 : prev - 1
-    );
+    setCurrentIndex((prev) => (prev === 0 ? productos.length - 1 : prev - 1));
   };
 
   const nextSlide = () => {
-    setCurrentIndex((prev) =>
-      prev === productos.length - 1 ? 0 : prev + 1
-    );
+    setCurrentIndex((prev) => (prev === productos.length - 1 ? 0 : prev + 1));
   };
 
   return (
-    <div className="carousel-container">
-      <h2 className="carousel-title">¡Más vendidos!</h2>
+    <div className="bg-[#3E3E3E] text-white py-6 px-6 min-w-screen max-w-screen mt-10 mb-10 mx-auto max-w-7xl shadow-md">
+      {/* Título */}
+      <h2 className="text-2xl font-bold text-[#EEDA00] mb-5 text-center">
+        ¡Más vendidos!
+      </h2>
 
-      <div className="carousel">
-        <button className="carousel-btn left" onClick={prevSlide}>
-          ◀
+      <div className="relative flex items-center justify-center">
+        {/* Botón izquierdo */}
+        <button
+          onClick={prevSlide}
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white w-14 h-14 flex items-center justify-center rounded-full hover:bg-[#505050] shadow-lg transition-all duration-300 cursor-pointer"
+        >
+          <ChevronLeft className="w-8 h-8" />
         </button>
 
-       <div className="flex gap-4 overflow-x-auto px-4 no-scrollbar">
-  {productos.map((p) => (
-    <div
-        key={p.id}
-        className="min-w-[220px] max-w-[220px] bg-[#1a1a1a] text-white p-4 rounded-lg flex-shrink-0 shadow-md"
->
+        {/* Contenedor del carrusel */}
+        <div className="flex gap-4 overflow-hidden px-4 py-2 scroll-smooth">
+          {productos.map((p) => (
+            <div
+              key={p.id}
+              className="min-w-[180px] max-w-[180px] bg-[#2F2F2F] rounded-lg p-3 flex flex-col justify-center items-center flex-shrink-0 shadow hover:shadow-lg hover:scale-[1.01] transition-transform duration-300"
+            >
+              <img
+                src={p.img}
+                alt={p.nombre}
+                className="w-full h-32 object-contain mb-2"
+              />
+              <h3 className="text-sm font-semibold mb-1 text-center">{p.nombre}</h3>
+              <p className="text-[#EEDA00] font-bold text-sm mb-1 text-center">
+                {p.precio}
+              </p>
+              <p className="text-xs text-gray-300 mb-2 text-center">
+                ¡Mismo precio en 6 cuotas fijas!
+              </p>
+              <Link
+                to={`/product/${p.id}`}
+                className="block text-center bg-[#EEDA00] text-black font-semibold px-2 py-1 rounded-md hover:opacity-90 transition text-sm"
+              >
+                Ver Producto
+              </Link>
+            </div>
+          ))}
+        </div>
 
-      <img
-        src={p.img}
-        alt={p.nombre}
-        className="w-full h-40 object-contain mb-2"
-      />
-      <h3 className="text-sm font-bold">{p.nombre}</h3>
-      <p className="text-yellow-400 font-bold">{p.precio}</p>
-      <p className="text-xs text-gray-300">Mismo precio en 6 cuotas fijas!</p>
-      <Link to={'product/' + p.id} className="mt-2 bg-yellow-400 text-black px-3 py-1 rounded font-bold hover:bg-yellow-500">
-        Ver Producto
-      </Link>
-    </div>
-  ))}
-</div>
-
-
-        <button className="carousel-btn right" onClick={nextSlide}>
-          ▶
+        {/* Botón derecho */}
+        <button
+          onClick={nextSlide}
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white w-14 h-14 flex items-center justify-center rounded-full hover:bg-[#505050] shadow-lg transition-all duration-300 cursor-pointer"
+        >
+          <ChevronRight className="w-8 h-8" />
         </button>
       </div>
     </div>
   );
 }
+
+export default Carousel;
