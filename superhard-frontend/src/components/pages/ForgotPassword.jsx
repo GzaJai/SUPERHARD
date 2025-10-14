@@ -43,11 +43,19 @@ export default function ForgotPassword() {
     <div className="bg-[#494949] w-dvw mx-auto pt-[7rem] pb-[5rem] flex justify-center">
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col p-[2rem] w-2/3 md:w-1/3 bg-[#353535] text-white text-center items-center rounded-xl gap-[1.5rem] shadow-lg"
+        className="flex flex-col p-[2rem] w-3/4 md:w-3/4 bg-[#353535] text-white rounded-xl gap-[1.5rem] shadow-lg items-start"
       >
-        <h2 className="text-3xl text-[#EEDA00]">Olvidé mi contraseña</h2>
+        <h2 className="text-3xl text-[#EEDA00] font-bold mb-2">Olvidé mi contraseña</h2>
+
+        <label
+          htmlFor="email"
+          className="text-sm text-[#cfcfcf]"
+        >
+          Ingresa tu correo para reestablecer tu contraseña
+        </label>
 
         <input
+          id="email"
           type="email"
           placeholder="Ingresa tu correo"
           value={email}
@@ -61,12 +69,12 @@ export default function ForgotPassword() {
         <button
           type="submit"
           disabled={loading}
-          className={`p-[1rem] font-bold text-2xl text-black bg-[#EEDA00] rounded-lg cursor-pointer ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+          className={`mt-2 px-6 py-3 font-bold text-xl text-black bg-[#EEDA00] rounded-lg cursor-pointer self-start ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
         >
           {loading ? 'Enviando...' : 'Enviar enlace'}
         </button>
 
-        <Link to="/login" className="text-sm mt-2">
+        <Link to="/login" className="text-sm mt-4 text-[#fff] hover:underline self-start">
           Volver al login
         </Link>
       </form>

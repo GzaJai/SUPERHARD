@@ -72,8 +72,8 @@ const Login = ({setUser}) => {
         {error && <p className="text-red-400">{error}</p>}
 
         <div className='flex w-full px-5 justify-around'>
-          <Link to="/register">Registrarme</Link>
-          <Link to="/forgot">Olvide mi contraseña</Link>
+          <Link to="/register" className='hover:underline self-start'>Registrarme</Link>
+          <Link to="/forgot" className='hover:underline self-start'>Olvide mi contraseña</Link>
         </div>
 
         <button 
