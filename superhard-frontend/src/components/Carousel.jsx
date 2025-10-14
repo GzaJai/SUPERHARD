@@ -26,7 +26,7 @@ function Carousel() {
   };
 
   return (
-    <div className="bg-[#3E3E3E] text-white py-6 px-6 mt-10 mb-10 mx-auto min-w-screen max-w-7xl shadow-md">
+    <div className="bg-[#3E3E3E] text-white py-6 px-6 mt-10 mb-10 mx-auto min-w-screen max-w-7xl shadow-[0_0_4px_rgba(0,0,0,0.9)]">
       {/* Título */}
       <h2 className="text-2xl font-bold text-[#EEDA00] mb-5 text-center">
         ¡Más vendidos!
