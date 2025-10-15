@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const OrderSummary = () => {
   const [order, setOrder] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const savedOrder = JSON.parse(localStorage.getItem("orderSummary"));
     if (savedOrder) setOrder(savedOrder);
   }, []);
+
+  const handleBackHome = () => {
+    // 🧹 Borrar toda la información anterior
+    localStorage.removeItem("orderSummary");
+    localStorage.removeItem("cartItems");
+    localStorage.removeItem("cartTotal");
+
+    // Redirigir al inicio
+    navigate("/");
+  };
 
   if (!order) {
     return (
@@ -40,9 +51,6 @@ const OrderSummary = () => {
           <strong>Código Postal:</strong> {order.contact.postal}
         </p>
         <p>
-          <strong>Departamento / Piso:</strong> {order.contact.department || "N/A"}
-        </p>
-        <p>
           <strong>Fecha:</strong> {order.date}
         </p>
 
@@ -72,12 +80,12 @@ const OrderSummary = () => {
         </div>
 
         <div className="flex justify-center mt-8">
-          <Link
-            to="/"
-            className="bg-[#EEDA00] text-black px-6 py-3 rounded-xl font-bold hover:opacity-90 transition"
+          <button
+            onClick={handleBackHome}
+            className="bg-[#EEDA00] text-black px-6 py-3 rounded-xl font-bold hover:opacity-90 transition hover: cursor-pointer"
           >
             Volver al inicio
-          </Link>
+          </button>
         </div>
       </div>
     </div>
