@@ -99,6 +99,15 @@ export default function ProductForm() {
           className="p-2 rounded text-white bg-neutral-800"
         />
 
+        <textarea
+          name="description"
+          placeholder="Descripción"
+          value={producto.description}
+          onChange={handleChange}
+          className="p-2 rounded text-white bg-neutral-800"
+        
+        />
+
         <button
           type="submit"
           className="bg-green-600 px-4 py-2 rounded hover:bg-green-700 text-white"
