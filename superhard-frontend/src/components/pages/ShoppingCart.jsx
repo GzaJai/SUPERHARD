@@ -158,6 +158,7 @@ const ShoppingCart = () => {
 
 
     </div>
+
   );
 };
 

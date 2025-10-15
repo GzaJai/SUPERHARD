@@ -9,7 +9,6 @@ const ProductDetails = () => {
   const [product, setProduct] = useState();
   const { id } = useParams();
   const { addToCart } = useContext(CartContext);
-
   const increase = () => setCantidad(prev => prev + 1);
   const decrease = () => {
     if (cantidad > 1) setCantidad(prev => prev - 1);

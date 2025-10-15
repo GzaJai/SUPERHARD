@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 function Carousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const visibleCount = 3;
 
   // Cantidad de productos visibles a la vez (deseada)
   const itemsPerView = 4;
@@ -102,7 +103,7 @@ function Carousel() {
           <ChevronRight className="w-8 h-8" />
         </button>
       </div>
-    </div>
+    </section>
   );
 }
 
