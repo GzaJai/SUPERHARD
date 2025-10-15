@@ -2,10 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from '../components/pages/Home';
 import Login from '../components/pages/Login';
-import Header from '../components/Header';
 import ShoppingCart from '../components/pages/ShoppingCart';
 import ProductDetails from '../components/pages/ProductDetails';
-import Footer from '../components/Footer';
 import Register from '../components/pages/Register';
 import ForgotPassword from '../components/pages/ForgotPassword';
 import BuyPage from '../components/pages/BuyPage';
@@ -32,6 +30,7 @@ export default function AppRouter({ user, setUser }) {
               <Route path='/buy' element={<BuyPage />} />
               <Route path='/order-summary' element={<OrderSummary />} />
             </Route>
+            
             {/* Admin */}
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="products" element={<ProductList />} />

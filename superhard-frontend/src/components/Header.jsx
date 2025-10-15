@@ -192,13 +192,13 @@ function Header({ user, setUser }) {
             )}
           </div>
 
-          <button className="text-[#EEDA00] px-4 text-lg border-r hover:bg-blue-600">
+          <button className="text-[#EEDA00] px-4 text-lg border-r hover:cursor-pointer">
             OFERTAS
           </button>
 
           {/* Resto de categorías */}
           {categories.map((c) => (
-            <Link key={c} to={`/products?categoria=${encodeURIComponent(c)}`} className="px-3 py-1 rounded hover:bg-orange-500">
+            <Link key={c} to={`/products?categoria=${encodeURIComponent(c)}`} className="px-3 py-1 rounded hover:text-[#EEDA00] cursor-pointer transition">
               {c}
             </Link>
           ))}
@@ -211,7 +211,6 @@ function Header({ user, setUser }) {
 
       {/* 🔹 Margen inferior para contenido */}
       <div className="pt-[6rem]">
-        <Outlet />
       </div>
     </>
   );
