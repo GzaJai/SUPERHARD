@@ -1,8 +1,8 @@
-import { Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 function Footer() {
   return (
-    <footer className="bg-black text-white min-w-screen py-10">
+    <footer className="bg-black text-white w-full box-border py-10 relative">
       <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
         
         {/* Marca */}
@@ -55,4 +55,3 @@ function Footer() {
 }
 
 export default Footer;
-

@@ -1,16 +1,22 @@
+/* Contenedor principal del Carousel */
 .carousel-container {
   width: 100%;
   margin: 0 auto;
   text-align: center;
+  margin-bottom: 6rem; /* espacio suficiente para el Footer */
+  overflow-x: hidden;   /* evita scroll horizontal */
 }
 
+/* Título */
 .carousel-title {
   font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 15px;
-  color: #FFD700; /* amarillo */
+  color: #EEDA00;
+  text-align: center;
 }
 
+/* Contenedor de items y botones */
 .carousel {
   display: flex;
   align-items: center;
@@ -19,46 +25,61 @@
   overflow: hidden;
 }
 
+/* Track de productos */
 .carousel-track {
   display: flex;
   gap: 20px;
   transition: transform 0.3s ease-in-out;
 }
 
+/* Item individual */
 .carousel-item {
   min-width: 200px;
-  background: #1a1a1a;
+  background: #2F2F2F;
   color: white;
   border-radius: 10px;
   padding: 15px;
   text-align: center;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
 }
 
+.carousel-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+}
+
+/* Imagen */
 .carousel-img {
   width: 100%;
   height: auto;
   margin-bottom: 10px;
+  object-fit: contain;
 }
 
+/* Nombre */
 .carousel-name {
   font-size: 1rem;
   margin-bottom: 5px;
 }
 
+/* Precio */
 .carousel-precio {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #FFD700;
+  color: #EEDA00;
 }
 
+/* Cuotas */
 .carousel-cuotas {
   font-size: 0.8rem;
   color: #ccc;
   margin: 5px 0;
 }
 
+/* Botón ver producto */
 .carousel-btn-ver {
-  background: #FFD700;
+  background: #EEDA00;
   color: black;
   border: none;
   padding: 8px 12px;
@@ -67,16 +88,18 @@
   cursor: pointer;
 }
 
+/* Botones de navegación */
 .carousel-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: #FFD700;
+  background: #585858;
   border: none;
   padding: 10px;
   cursor: pointer;
   font-size: 1.5rem;
   border-radius: 50%;
+  z-index: 5; /* debajo del Footer */
 }
 
 .carousel-btn.left {
@@ -85,4 +108,9 @@
 
 .carousel-btn.right {
   right: 10px;
+}
+
+.carousel-btn:hover {
+  background: #292929;
+  transition: all 0.3s ease;
 }

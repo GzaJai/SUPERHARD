@@ -1,11 +1,14 @@
 import { useState, useContext } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link } from "react-router-dom";
 import CartContext from "../context/CartContext";
 
 export default function Header({ user, setUser }) {
   const [search, setSearch] = useState("");
-  const categories = ["Procesadores", "Placas de video", "Memorias RAM", "Periféricos", "Gabinetes", "Notebooks"];
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { cartQuantity } = useContext(CartContext);
+
+  // Categorías fijas
+  const categories = ["Procesadores", "Placas de video", "Memorias RAM", "Periféricos", "Gabinetes", "Notebooks"];
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -102,21 +105,67 @@ export default function Header({ user, setUser }) {
         </div>
 
         {/* --- Fila de categorías debajo del buscador --- */}
-        <nav className="flex py-[.3rem] bg-[#282828] justify-around gap-2">
+        <nav className="flex py-[.3rem] bg-[#282828] justify-around gap-2 items-center relative">
+          {/* Botón ☰ y menú lateral */}
+          <div className="relative">
+            <button
+              className="bg-[#EEDA00] text-black px-3 py-1 rounded font-bold shadow hover:bg-yellow-400"
+              onClick={() => setSidebarOpen(true)}
+            >
+              ☰
+            </button>
+
+            {/* Overlay y Sidebar */}
+            {sidebarOpen && (
+              <>
+                <div
+                  className="fixed inset-0 bg-black/60 z-40"
+                  onClick={() => setSidebarOpen(false)}
+                ></div>
+                <div className="fixed top-0 left-0 h-full w-64 bg-neutral-900 text-white shadow-lg flex flex-col p-6 z-50 transition-transform duration-300">
+                  <button
+                    className="self-end mb-6 text-2xl text-gray-400 hover:text-white"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    ×
+                  </button>
+                  <Link to="/" className="py-2 hover:bg-neutral-800 rounded" onClick={() => setSidebarOpen(false)}>Inicio</Link>
+                  <Link to="/shopping-cart" className="py-2 hover:bg-neutral-800 rounded" onClick={() => setSidebarOpen(false)}>Carrito</Link>
+                  <Link to="/login" className="py-2 hover:bg-neutral-800 rounded" onClick={() => setSidebarOpen(false)}>Iniciar sesión</Link>
+
+                  <div className="mt-4">
+                    <h4 className="text-sm text-gray-300 mb-2">Categorías</h4>
+                    <ul className="flex flex-col gap-1">
+                      {categories.map((c) => (
+                        <li key={c}>
+                          <Link to={`/products?categoria=${encodeURIComponent(c)}`} className="py-2 hover:bg-neutral-800 rounded block" onClick={() => setSidebarOpen(false)}>
+                            {c}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
           <button className="text-[#EEDA00] px-4 text-lg border-r hover:bg-blue-600">
             OFERTAS
           </button>
+
+          {/* Resto de categorías */}
           {categories.map((c) => (
-            <button key={c} className="px-3 py-1 rounded hover:bg-orange-500">
+            <Link key={c} to={`/products?categoria=${encodeURIComponent(c)}`} className="px-3 py-1 rounded hover:bg-orange-500">
               {c}
-            </button>
+            </Link>
           ))}
+
           <button className="text-[#EEDA00] px-4 text-lg border-l hover:bg-blue-600">
             Arma tu PC
           </button>
         </nav>
       </header>
-      <Outlet />
     </>
   );
 }
