@@ -3,55 +3,64 @@ import { createContext, useState, useEffect } from "react";
 export const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    const savedCart = localStorage.getItem("cart");
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+
   const [cartQuantity, setCartQuantity] = useState(0);
 
-  // 🔹 Recalcular cantidad total de unidades en el carrito
   useEffect(() => {
     const totalUnidades = cart.reduce((acc, item) => acc + item.cantidad, 0);
     setCartQuantity(totalUnidades);
+    localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  // 🔹 Agregar producto con cantidad personalizada
   const addToCart = (product, cantidad = 1) => {
     setCart((prevCart) => {
       const existingProduct = prevCart.find((item) => item.id === product.id);
-
       if (existingProduct) {
-        // Si ya existe, aumenta la cantidad
         return prevCart.map((item) =>
           item.id === product.id
             ? { ...item, cantidad: item.cantidad + cantidad }
             : item
         );
       } else {
-        // Si no existe, lo agrega con la cantidad deseada
         return [...prevCart, { ...product, cantidad }];
       }
     });
   };
 
+  // 🔹 Nunca permitir que la cantidad sea menor a 1
   const removeFromCart = (product) => {
-    setCart((prevCart) => {
-      const existingProduct = prevCart.find((item) => item.id === product.id);
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === product.id
+          ? { ...item, cantidad: Math.max(item.cantidad - 1, 1) }
+          : item
+      )
+    );
+  };
 
-      if (!existingProduct) return prevCart;
+  const deleteFromCart = (product) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== product.id));
+  };
 
-      if (existingProduct.cantidad === 1) {
-        return prevCart.filter((item) => item.id !== product.id);
-      } else {
-        return prevCart.map((item) =>
-          item.id === product.id
-            ? { ...item, cantidad: item.cantidad - 1 }
-            : item
-        );
-      }
-    });
+  // 🔹 Vaciar todo el carrito al comprar
+  const clearCart = () => {
+    setCart([]);
   };
 
   return (
     <CartContext.Provider
-      value={{ cart, cartQuantity, addToCart, removeFromCart }}
+      value={{
+        cart,
+        cartQuantity,
+        addToCart,
+        removeFromCart,
+        deleteFromCart,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>

@@ -1,73 +1,131 @@
 import { useContext } from "react";
 import CartContext from "../../context/CartContext";
-import { toInt } from "../../utils/FormatUtils";
 
 const ShoppingCart = () => {
-  const { cart, addToCart, removeFromCart } = useContext(CartContext);
+  const { cart, addToCart, removeFromCart, deleteFromCart, clearCart } =
+    useContext(CartContext);
+
+  const parsePrice = (price) => {
+    if (!price) return 0;
+    const cleaned = price.toString().replace(/[^0-9.]/g, "");
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+  };
+
+  const formatNumber = (num) => {
+    const fixed = parsePrice(num).toFixed(3);
+    const parts = fixed.split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return parts.join(".");
+  };
+
+  const total = cart.reduce(
+    (acc, item) => acc + parsePrice(item.precio) * item.cantidad,
+    0
+  );
 
   return (
-    <div className="bg-[#494949] w-dvw h-dvh pt-[1rem]">
-      {/* Título */}
-      <div className="flex items-center justify-center gap-[1rem] mb-6">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width={64}
-          height={64}
-          fill={"#FFFFFF"}
-          viewBox="0 0 24 24"
-        >
-          <path d="M10.5 18a1.5 1.5 0 1 0 0 3 1.5 1.5 0 1 0 0-3M17.5 18a1.5 1.5 0 1 0 0 3 1.5 1.5 0 1 0 0-3M8.82 15.77c.31.75 1.04 1.23 1.85 1.23h6.18c.79 0 1.51-.47 1.83-1.2l3.24-7.4c.14-.31.11-.67-.08-.95A1 1 0 0 0 21 7H7.33L5.92 3.62C5.76 3.25 5.4 3 5 3H2v2h2.33z"></path>
-        </svg>
-        <h2 className="font-bold text-white text-3xl">Mi carrito</h2>
-      </div>
-
-      <div className="flex flex-col w-11/12 mx-auto bg-[#646464] rounded-lg gap-4 p-4 shadow-md">
-        {/* Si no hay productos */}
-        {(!cart || cart.length === 0) && (
-          <div className="flex flex-col items-center justify-center text-center bg-[#2F2F2F] text-white p-8 rounded-lg shadow-md">
-            <h3 className="text-2xl font-bold mb-2">🛒 No hay productos en el carrito</h3>
-            <p className="text-gray-300">Agrega productos para comenzar tu compra.</p>
-          </div>
-        )}
-
-        {/* Si hay productos */}
-        {cart && cart.length > 0 &&
-          cart.map((product) => (
-            <div key={product.id} className="flex justify-between items-center bg-[#555555] rounded-lg shadow p-3">
-              <img
-                src={product.img}
-                alt={product.nombre}
-                className="p-[1rem] w-[8rem] h-auto rounded-xl bg-white"
-              />
-              <div className="flex flex-col font-semibold text-white gap-3">
-                <p>{product.nombre}</p>
-                <p>
-                  <span className="font-bold">{product.precio}</span> x unidad
-                </p>
-                <div className="flex bg-white text-black rounded-lg justify-between items-center">
-                  <button
-                    onClick={() => removeFromCart(product)}
-                    className="px-3 py-1 font-black bg-[#EEDA00] cursor-pointer rounded-l-lg hover:opacity-90"
-                  >
-                    -
-                  </button>
-                  <p className="px-3">{product.cantidad}</p>
-                  <button
-                    onClick={() => addToCart(product)}
-                    className="px-3 py-1 font-black bg-[#EEDA00] cursor-pointer rounded-r-lg hover:opacity-90"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-              <div className="flex w-1/4 items-center justify-center text-center">
-                <p className="font-bold text-white text-lg">
-                  ${toInt(product.precio) * product.cantidad}
-                </p>
-              </div>
+    <div className="bg-[#494949] min-h-screen pt-[2rem] pb-[6rem] flex flex-col md:flex-row gap-6 px-6">
+      {/* Contenedor de carrito */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="flex flex-col w-full max-w-4xl mx-auto bg-[#646464] rounded-2xl gap-6 p-6 shadow-md">
+          {cart.length === 0 && (
+            <div className="flex flex-col items-center justify-center text-center bg-[#2F2F2F] text-white p-10 rounded-lg shadow-md">
+              <h3 className="text-2xl font-bold mb-3">🛒 No hay productos en el carrito</h3>
+              <p className="text-gray-300">Agrega productos para comenzar tu compra.</p>
             </div>
-          ))}
+          )}
+
+          {cart.length > 0 &&
+            cart.map((product) => {
+              const price = parsePrice(product.precio);
+              const subtotal = price * product.cantidad;
+
+              return (
+                <div
+                  key={product.id}
+                  className="flex flex-col md:flex-row justify-between items-center bg-[#555555] rounded-xl shadow-lg p-5 gap-6 hover:bg-[#5d5d5d] transition-all duration-200"
+                >
+                  {/* Imagen */}
+                  <div className="flex-shrink-0">
+                    <img
+                      src={product.img}
+                      alt={product.nombre}
+                      className="w-[9rem] h-[9rem] object-contain rounded-xl bg-white p-3 shadow-md"
+                    />
+                  </div>
+
+                  {/* Info + contador */}
+                  <div className="flex flex-col text-white font-medium flex-1 gap-3">
+                    <p className="text-lg font-semibold">{product.nombre}</p>
+                    <p className="text-sm opacity-90">
+                      <span className="font-bold">${formatNumber(price)}</span> x unidad
+                    </p>
+                    <div className="flex bg-white text-black rounded-lg w-fit items-center">
+                      <button
+                        onClick={() => removeFromCart(product)}
+                        className="px-4 py-1 font-black bg-[#EEDA00] rounded-l-lg cursor-pointer hover:opacity-90"
+                      >
+                        -
+                      </button>
+                      <p className="px-4">{product.cantidad}</p>
+                      <button
+                        onClick={() => addToCart(product)}
+                        className="px-4 py-1 font-black bg-[#EEDA00] rounded-r-lg cursor-pointer hover:opacity-90"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Botón eliminar */}
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <button
+                      onClick={() => deleteFromCart(product)}
+                      className="cursor-pointer hover:opacity-80"
+                      title="Eliminar producto"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="#EEDA00"
+                        viewBox="0 0 24 24"
+                        width="28"
+                        height="28"
+                      >
+                        <path d="M3 6h18v2H3V6zm2 3h14l-1.5 12.5a1 1 0 0 1-1 .5H7a1 1 0 0 1-1-.5L4 9zm5 2v8h2v-8H9zm4 0v8h2v-8h-2z" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Precio subtotal */}
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <p className="font-bold text-lg text-white bg-[#2F2F2F] px-4 py-2 rounded-lg shadow-inner">
+                      ${formatNumber(subtotal)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
       </div>
+
+      {/* Total y comprar fijo a la derecha */}
+      {cart.length > 0 && (
+        <div className="hidden md:flex flex-col sticky top-[7rem] w-[300px] h-fit self-start">
+          <div className="flex flex-col justify-between bg-[#555555] rounded-xl p-5 shadow-lg gap-4">
+            <div className="text-white font-bold text-xl">
+              Total: ${formatNumber(total)}
+            </div>
+            <button
+              onClick={clearCart}
+              className="bg-[#EEDA00] text-black font-bold px-6 py-3 rounded-xl shadow-lg hover:opacity-90 cursor-pointer transition-all duration-200"
+            >
+              Comprar
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
