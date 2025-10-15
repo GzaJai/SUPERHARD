@@ -8,6 +8,8 @@ import ProductDetails from '../components/pages/ProductDetails';
 import Footer from '../components/Footer';
 import Register from '../components/pages/Register';
 import ForgotPassword from '../components/pages/ForgotPassword';
+import BuyPage from '../components/pages/BuyPage';
+import OrderSummary from '../components/pages/OrderSummary';
 
 
 export default function AppRouter({user, setUser}) {
@@ -23,6 +25,8 @@ export default function AppRouter({user, setUser}) {
             <Route path='/login' element={<Login setUser={setUser} />} />
             <Route path="/register" element={<Register setUser={setUser} />} />
             <Route  path='/forgot' element= {<ForgotPassword/>}/>
+            <Route  path='/buy' element= {<BuyPage />}/>
+            <Route  path='/order-summary' element= {<OrderSummary />}/>
         </Routes>
 
        <Footer />

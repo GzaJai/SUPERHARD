@@ -1,9 +1,13 @@
 import { useContext } from "react";
 import CartContext from "../../context/CartContext";
+import { useNavigate } from "react-router-dom";
+
 
 const ShoppingCart = () => {
   const { cart, addToCart, removeFromCart, deleteFromCart, clearCart } =
     useContext(CartContext);
+  const navigate = useNavigate();
+
 
   const parsePrice = (price) => {
     if (!price) return 0;
@@ -23,6 +27,16 @@ const ShoppingCart = () => {
     (acc, item) => acc + parsePrice(item.precio) * item.cantidad,
     0
   );
+
+  const handleBuy = () => {
+    if (cart.length === 0) return; // No hacer nada si el carrito está vacío
+    // Guardar productos en localStorage para BuyPage
+    localStorage.setItem("cartItems", JSON.stringify(cart));
+    // Limpiar carrito
+    clearCart();
+    // Redirigir a /buy
+    navigate("/buy");
+  };
 
   return (
     <div className="bg-[#494949] min-h-screen pt-[2rem] pb-[6rem] flex flex-col md:flex-row gap-6 px-6">
@@ -119,11 +133,11 @@ const ShoppingCart = () => {
                 Total: ${formatNumber(total)}
               </div>
               <button
-                onClick={clearCart}
-                className="bg-[#EEDA00] text-black font-bold px-6 py-3 rounded-xl shadow-lg hover:opacity-90 cursor-pointer transition-all duration-200"
-              >
-                Comprar
-              </button>
+              onClick={handleBuy} // <-- función revisada
+              className="bg-[#EEDA00] text-black font-bold px-6 py-3 rounded-xl shadow-lg hover:opacity-90 cursor-pointer transition-all duration-200"
+            >
+              Comprar
+            </button>
             </div>
           </div>
 
@@ -132,11 +146,11 @@ const ShoppingCart = () => {
             <div className="flex justify-between bg-[#555555] rounded-xl p-4 shadow-lg">
               <div className="text-white font-bold text-lg">Total: ${formatNumber(total)}</div>
               <button
-                onClick={clearCart}
-                className="bg-[#EEDA00] text-black font-bold px-4 py-2 rounded-xl shadow-lg hover:opacity-90 cursor-pointer transition-all duration-200"
-              >
-                Comprar
-              </button>
+              onClick={handleBuy} // <-- función revisada
+              className="bg-[#EEDA00] text-black font-bold px-6 py-3 rounded-xl shadow-lg hover:opacity-90 cursor-pointer transition-all duration-200"
+            >
+              Comprar
+            </button>
             </div>
           </div>
         </>
