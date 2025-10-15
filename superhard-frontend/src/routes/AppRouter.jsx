@@ -30,6 +30,7 @@ export default function AppRouter({ user, setUser }) {
             <Route path="/admin" element={<AdminLayout />}>
               <Route path="products" element={<ProductList />} />
               <Route path="add" element={<ProductForm />} />
+              <Route path="edit/:id" element={<ProductForm/>} />
               <Route path="users" element={<UserList />} />
             </Route>
           </Routes>

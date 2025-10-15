@@ -6,38 +6,41 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [cartQuantity, setCartQuantity] = useState(0);
 
-  // 🔹 Recalcular cantidad total de unidades en el carrito
+  // 🔹 Cargar carrito desde localStorage
   useEffect(() => {
+    const saved = localStorage.getItem("cart");
+    if (saved) setCart(JSON.parse(saved));
+  }, []);
+
+  // 🔹 Guardar carrito en localStorage cada vez que cambie
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
     const totalUnidades = cart.reduce((acc, item) => acc + item.cantidad, 0);
     setCartQuantity(totalUnidades);
   }, [cart]);
 
-  // 🔹 Agregar producto con cantidad personalizada
+  // 🔹 Agregar producto al carrito
   const addToCart = (product, cantidad = 1) => {
     setCart((prevCart) => {
-      const existingProduct = prevCart.find((item) => item.id === product.id);
-
-      if (existingProduct) {
-        // Si ya existe, aumenta la cantidad
+      const existing = prevCart.find((item) => item.id === product.id);
+      if (existing) {
         return prevCart.map((item) =>
           item.id === product.id
             ? { ...item, cantidad: item.cantidad + cantidad }
             : item
         );
-      } else {
-        // Si no existe, lo agrega con la cantidad deseada
-        return [...prevCart, { ...product, cantidad }];
       }
+      return [...prevCart, { ...product, cantidad }];
     });
   };
 
+  // 🔹 Quitar producto del carrito
   const removeFromCart = (product) => {
     setCart((prevCart) => {
-      const existingProduct = prevCart.find((item) => item.id === product.id);
+      const existing = prevCart.find((item) => item.id === product.id);
+      if (!existing) return prevCart;
 
-      if (!existingProduct) return prevCart;
-
-      if (existingProduct.cantidad === 1) {
+      if (existing.cantidad === 1) {
         return prevCart.filter((item) => item.id !== product.id);
       } else {
         return prevCart.map((item) =>
@@ -50,9 +53,7 @@ export function CartProvider({ children }) {
   };
 
   return (
-    <CartContext.Provider
-      value={{ cart, cartQuantity, addToCart, removeFromCart }}
-    >
+    <CartContext.Provider value={{ cart, cartQuantity, addToCart, removeFromCart }}>
       {children}
     </CartContext.Provider>
   );

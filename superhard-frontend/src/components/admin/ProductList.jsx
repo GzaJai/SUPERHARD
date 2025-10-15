@@ -1,9 +1,11 @@
 // src/components/admin/ProductList.jsx
 import React, { useEffect, useState } from "react";
+import {useNavigate} from 'react-router-dom';
 
 export default function ProductList() {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -64,7 +66,9 @@ export default function ProductList() {
                   >
                     Eliminar
                   </button>
-                  <button className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600">
+                  <button 
+                  onClick={() => navigate(`/admin/edit/${p.id}`)}
+                  className="bg-yellow-500 px-3 py-1 rounded hover:bg-yellow-600">
                     Editar
                   </button>
                 </td>

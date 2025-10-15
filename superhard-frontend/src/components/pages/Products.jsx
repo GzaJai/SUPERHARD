@@ -69,7 +69,7 @@ export default function Products() {
           <h2 className="text-2xl font-bold mb-4">Productos {selected ? `- ${selected}` : ''}</h2>
           <div className="grid grid-cols-3 gap-6">
             {filtered.map(p => (
-              <ProductCard key={p.id} img={p.image} title={p.nombre} price={typeof p.precio === 'string' ? p.precio.replace(/[^0-9.,]/g,'') : p.precio} />
+              <ProductCard id={p.id} img={p.image} title={p.nombre} price={typeof p.precio === 'string' ? p.precio.replace(/[^0-9.,]/g,'') : p.precio} />
             ))}
           </div>
         </section>

@@ -17,6 +17,8 @@ public class ProductoModel {
     private Long id;
     private String nombre;
     private Double precio;
+    @Lob
+    private String description;
     private String categoria;
     private int stock;
     private String image;

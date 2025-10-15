@@ -1,0 +1,36 @@
+2025-10-15 20:16:12.440296-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Valor demasiado largo para la columna "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"
+Value too long for column "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"; SQL statement:
+update productos set categoria=?,description=?,image=?,nombre=?,precio=?,stock=? where id=? [22001-232]
+2025-10-15 20:16:47.220880-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Valor demasiado largo para la columna "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"
+Value too long for column "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"; SQL statement:
+update productos set categoria=?,description=?,image=?,nombre=?,precio=?,stock=? where id=? [22001-232]
+2025-10-15 20:17:04.619822-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Valor demasiado largo para la columna "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"
+Value too long for column "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"; SQL statement:
+update productos set categoria=?,description=?,image=?,nombre=?,precio=?,stock=? where id=? [22001-232]
+2025-10-15 20:17:40.454215-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Valor demasiado largo para la columna "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"
+Value too long for column "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"; SQL statement:
+update productos set categoria=?,description=?,image=?,nombre=?,precio=?,stock=? where id=? [22001-232]
+2025-10-15 20:19:13.983205-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Valor demasiado largo para la columna "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"
+Value too long for column "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"; SQL statement:
+update productos set categoria=?,description=?,image=?,nombre=?,precio=?,stock=? where id=? [22001-232]
+2025-10-15 20:19:24.432479-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Valor demasiado largo para la columna "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (256)"
+Value too long for column "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (256)"; SQL statement:
+update productos set categoria=?,description=?,image=?,nombre=?,precio=?,stock=? where id=? [22001-232]
+2025-10-15 20:22:03.448382-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Valor demasiado largo para la columna "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"
+Value too long for column "DESCRIPTION CHARACTER VARYING(255)": "U&'-N\\00famero de n\\00facleos de CPU: 6\\000a-Subprocesos m\\00faltiples (SMT): S\\... (294)"; SQL statement:
+update productos set categoria=?,description=?,image=?,nombre=?,precio=?,stock=? where id=? [22001-232]
+2025-10-15 20:22:50.776189-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Valor demasiado largo para la columna "DESCRIPTION CHARACTER VARYING(255)": "U&'Especificaciones T\\00e9cnicas\\000a\\000aArquitectura: Zen 4\\000a\\000aN\\00facle... (302)"
+Value too long for column "DESCRIPTION CHARACTER VARYING(255)": "U&'Especificaciones T\\00e9cnicas\\000a\\000aArquitectura: Zen 4\\000a\\000aN\\00facle... (302)"; SQL statement:
+update productos set categoria=?,description=?,image=?,nombre=?,precio=?,stock=? where id=? [22001-232]
+2025-10-15 20:23:00.115020-03:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Valor demasiado largo para la columna "DESCRIPTION CHARACTER VARYING(255)": "U&'Especificaciones T\\00e9cnicas\\000a\\000aArquitectura: Zen 4\\000a\\000aN\\00facle... (303)"
+Value too long for column "DESCRIPTION CHARACTER VARYING(255)": "U&'Especificaciones T\\00e9cnicas\\000a\\000aArquitectura: Zen 4\\000a\\000aN\\00facle... (303)"; SQL statement:
+update productos set categoria=?,description=?,image=?,nombre=?,precio=?,stock=? where id=? [22001-232]

@@ -1,27 +1,37 @@
-// src/components/admin/ProductForm.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function ProductForm() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const [producto, setProducto] = useState({
     nombre: "",
     precio: "",
     categoria: "",
     stock: "",
     image: "",
+    description: "",
   });
 
   const categorias = [
-    "Procesadores",
-    "Placas de video",
-    "Memorias RAM",
-    "Periféricos",
-    "Gabinetes",
-    "Componentes",
-    "Periféricos",
-    "Accesorios",
-    "Portátiles",
-    "Monitores",
+    "Procesadores", "Placas de video", "Memorias RAM", "Periféricos",
+    "Gabinetes", "Componentes", "Accesorios", "Portátiles", "Monitores",
   ];
+
+  useEffect(() => {
+    if (!id) return; // Crear nuevo producto
+    const fetchProducto = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/productos/${id}`);
+        const data = await res.json();
+        setProducto(data);
+      } catch (err) {
+        console.error("Error al cargar producto:", err);
+      }
+    };
+    fetchProducto();
+  }, [id]);
 
   const handleChange = (e) => {
     setProducto({ ...producto, [e.target.name]: e.target.value });
@@ -29,21 +39,22 @@ export default function ProductForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch("http://localhost:8080/api/productos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(producto),
-    });
-    alert("Producto agregado correctamente");
-    setProducto({
-      nombre: "",
-      precio: "",
-      categoria: "",
-      stock: "",
-      image: "",
-    });
-  };
+    const method = id ? "PUT" : "POST";
+    const url = id 
+      ? `http://localhost:8080/api/productos/${id}` 
+      : "http://localhost:8080/api/productos";
 
+    try {
+      await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(producto),
+      });
+      navigate("/admin/products");
+    } catch (err) {
+      console.error("Error guardando producto:", err);
+    }
+  };
   return (
     <div className="p-8 bg-neutral-900 min-h-screen text-white">
       <h2 className="text-2xl mb-4 text-white">Agregar Producto</h2>
