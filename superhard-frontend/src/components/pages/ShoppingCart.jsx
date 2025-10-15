@@ -109,22 +109,39 @@ const ShoppingCart = () => {
         </div>
       </div>
 
-      {/* Total y comprar fijo a la derecha */}
+      {/* Total y comprar fijo */}
       {cart.length > 0 && (
-        <div className="hidden md:flex flex-col sticky top-[7rem] w-[300px] h-fit self-start">
-          <div className="flex flex-col justify-between bg-[#555555] rounded-xl p-5 shadow-lg gap-4">
-            <div className="text-white font-bold text-xl">
-              Total: ${formatNumber(total)}
+        <>
+          {/* Desktop: sticky a la derecha */}
+          <div className="hidden md:flex flex-col sticky top-[7rem] w-[300px] h-fit self-start">
+            <div className="flex flex-col justify-between bg-[#555555] rounded-xl p-5 shadow-lg gap-4">
+              <div className="text-white font-bold text-xl">
+                Total: ${formatNumber(total)}
+              </div>
+              <button
+                onClick={clearCart}
+                className="bg-[#EEDA00] text-black font-bold px-6 py-3 rounded-xl shadow-lg hover:opacity-90 cursor-pointer transition-all duration-200"
+              >
+                Comprar
+              </button>
             </div>
-            <button
-              onClick={clearCart}
-              className="bg-[#EEDA00] text-black font-bold px-6 py-3 rounded-xl shadow-lg hover:opacity-90 cursor-pointer transition-all duration-200"
-            >
-              Comprar
-            </button>
           </div>
-        </div>
+
+          {/* Móvil: fijo en la parte inferior */}
+          <div className="md:hidden fixed bottom-0 left-0 w-full px-4 pb-4 bg-transparent">
+            <div className="flex justify-between bg-[#555555] rounded-xl p-4 shadow-lg">
+              <div className="text-white font-bold text-lg">Total: ${formatNumber(total)}</div>
+              <button
+                onClick={clearCart}
+                className="bg-[#EEDA00] text-black font-bold px-4 py-2 rounded-xl shadow-lg hover:opacity-90 cursor-pointer transition-all duration-200"
+              >
+                Comprar
+              </button>
+            </div>
+          </div>
+        </>
       )}
+
 
     </div>
   );
