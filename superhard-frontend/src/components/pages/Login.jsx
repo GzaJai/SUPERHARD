@@ -40,7 +40,7 @@ const Login = ({setUser}) => {
         setError("Correo o contraseña incorrectos")
       }
     } catch (err) {
-      setError("Hubo un problema al iniciar sesión")
+      setError("Hubo un problema al iniciar sesión"+ err)
     }
   }
 
@@ -48,20 +48,20 @@ const Login = ({setUser}) => {
     <div className='bg-[#494949] w-dvw h-dvh pt-[5rem]'>
       <form 
         onSubmit={handleLogin} 
-        className='flex flex-col p-[2rem] mx-auto w-1/2 bg-[#3E3E3E] text-white text-center items-center rounded-xl gap-[2rem]'
+        className='flex flex-col p-[2rem] mx-auto w-3/5 bg-[#353535] text-white text-center items-center rounded-xl gap-[2rem]'
       >
         <h2 className='text-3xl text-[#EEDA00]'>Ingresa a tu cuenta</h2>
         
         <div className='flex flex-col w-3/4 items-center gap-[1rem]'>
           <input 
-            className='w-full p-1 bg-white text-[#3E3E3E] rounded-md'
+            className='w-full p-2 bg-[#353535] text-[#fff] border-b-2 border-[#EEDA00] outline-none focus:border-white transition-colors duration-200'
             type="email"
             placeholder='Ingresa tu correo'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <input 
-            className='w-full p-1 bg-white text-[#3E3E3E] rounded-md'
+            className='w-full p-2 bg-[#353535] text-[#fff] border-b-2 border-[#EEDA00] outline-none focus:border-white transition-colors duration-200'
             type="password"
             placeholder='Ingresa tu contraseña'
             value={password}
@@ -72,8 +72,8 @@ const Login = ({setUser}) => {
         {error && <p className="text-red-400">{error}</p>}
 
         <div className='flex w-full px-5 justify-around'>
-          <Link to="/register">Registrarme</Link>
-          <Link to="/forgot">Olvide mi contraseña</Link>
+          <Link to="/register" className='hover:underline self-start'>Registrarme</Link>
+          <Link to="/forgot" className='hover:underline self-start'>Olvide mi contraseña</Link>
         </div>
 
         <button 

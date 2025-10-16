@@ -3,7 +3,11 @@ import { createContext, useState, useEffect } from "react";
 export const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => {
+    const savedCart = localStorage.getItem("cart");
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+
   const [cartQuantity, setCartQuantity] = useState(0);
 
   // 🔹 Cargar carrito desde localStorage
@@ -17,7 +21,14 @@ export function CartProvider({ children }) {
     localStorage.setItem("cart", JSON.stringify(cart));
     const totalUnidades = cart.reduce((acc, item) => acc + item.cantidad, 0);
     setCartQuantity(totalUnidades);
+    localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
+
+    // 🔹 Limpiar carrito completo
+  const clearCart = () => {
+    setCart([]);
+  };
+
 
   // 🔹 Agregar producto al carrito
   const addToCart = (product, cantidad = 1) => {
@@ -53,7 +64,7 @@ export function CartProvider({ children }) {
   };
 
   return (
-    <CartContext.Provider value={{ cart, cartQuantity, addToCart, removeFromCart }}>
+    <CartContext.Provider value={{ cart, cartQuantity, addToCart, removeFromCart, clearCart }}>
       {children}
     </CartContext.Provider>
   );

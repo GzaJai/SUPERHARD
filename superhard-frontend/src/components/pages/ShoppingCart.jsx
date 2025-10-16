@@ -1,13 +1,21 @@
 import { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import CartContext from "../../context/CartContext";
 
 const ShoppingCart = () => {
-  const { cart, addToCart, removeFromCart } = useContext(CartContext);
+  const { cart, addToCart, removeFromCart, clearCart } = useContext(CartContext);
+  const navigate = useNavigate();
 
-  // Función para convertir precio a número
   const toNumber = (precio) => {
     if (typeof precio === "number") return precio;
     return Number(precio.toString().replace(/[^0-9.-]+/g, ""));
+  };
+
+  const handleBuy = () => {
+    if (cart.length === 0) return;
+    // Guardamos el carrito en localStorage para que BuyPage lo pueda leer
+    localStorage.setItem("cartItems", JSON.stringify(cart));
+    navigate("/buy"); // Redirigimos al checkout
   };
 
   return (
@@ -22,7 +30,7 @@ const ShoppingCart = () => {
         {cart.map((product) => (
           <div key={product.id} className="flex justify-between items-center bg-[#5A5A5A] rounded-lg p-4">
             <img
-              src={product.image} // corregido
+              src={product.image}
               className="w-[8rem] h-auto rounded-xl"
               alt={product.nombre}
             />
@@ -58,10 +66,13 @@ const ShoppingCart = () => {
 
       {cart.length > 0 && (
         <div className="text-white mt-4 p-4 text-right">
-          <p>
-            Total: $
-            {cart.reduce((acc, item) => acc + toNumber(item.precio) * item.cantidad, 0)}
-          </p>
+          <p>Total: ${cart.reduce((acc, item) => acc + toNumber(item.precio) * item.cantidad, 0)}</p>
+          <button
+            onClick={handleBuy}
+            className="bg-[#EEDA00] text-black font-bold py-2 px-4 rounded-lg mt-2 hover:bg-yellow-400"
+          >
+            Comprar ahora
+          </button>
         </div>
       )}
     </div>

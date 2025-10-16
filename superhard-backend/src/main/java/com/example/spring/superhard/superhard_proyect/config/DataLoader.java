@@ -1,6 +1,5 @@
 package com.example.spring.superhard.superhard_proyect.config;
 
-import com.example.spring.superhard.superhard_proyect.model.Direccion_Usuario;
 import com.example.spring.superhard.superhard_proyect.model.ProductoModel;
 import com.example.spring.superhard.superhard_proyect.model.Rol;
 import com.example.spring.superhard.superhard_proyect.model.UsuarioModel;
@@ -9,6 +8,8 @@ import com.example.spring.superhard.superhard_proyect.repository.UsuarioReposito
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class DataLoader implements CommandLineRunner {
