@@ -307,7 +307,7 @@ const BuyPage = () => {
             className="flex justify-between items-center gap-4 bg-[#353535] p-2 rounded-lg"
           >
             <img
-              src={product.img}
+              src={product.image}
               alt={product.nombre}
               className="w-20 h-20 object-contain rounded-xl bg-white p-2"
             />

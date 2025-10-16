@@ -14,6 +14,7 @@ const OrderSummary = () => {
     // 🧹 Borrar toda la información anterior
     localStorage.removeItem("orderSummary");
     localStorage.removeItem("cartItems");
+    localStorage.removeItem("cart");
     localStorage.removeItem("cartTotal");
 
     // Redirigir al inicio
@@ -62,7 +63,7 @@ const OrderSummary = () => {
           >
             <div className="flex items-center gap-3">
               <img
-                src={p.img}
+                src={p.image}
                 alt={p.nombre}
                 className="w-16 h-16 object-contain bg-white rounded-xl p-2"
               />
