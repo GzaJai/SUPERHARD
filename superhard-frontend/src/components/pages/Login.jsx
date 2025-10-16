@@ -40,7 +40,7 @@ const Login = ({setUser}) => {
         setError("Correo o contraseña incorrectos")
       }
     } catch (err) {
-      setError("Hubo un problema al iniciar sesión")
+      setError("Hubo un problema al iniciar sesión"+ err)
     }
   }
 
