@@ -95,7 +95,7 @@ const ShoppingCart = () => {
 
                   {/* Eliminar producto */}
                   <button
-                    onClick={() => deleteFromCart(product)}
+                    onClick={() => removeFromCart(product)}
                     className="cursor-pointer hover:opacity-80"
                     title="Eliminar producto"
                   >

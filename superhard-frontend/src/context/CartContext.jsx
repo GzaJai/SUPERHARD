@@ -29,6 +29,8 @@ export function CartProvider({ children }) {
     setCart([]);
   };
 
+  
+
 
   // 🔹 Agregar producto al carrito
   const addToCart = (product, cantidad = 1) => {
