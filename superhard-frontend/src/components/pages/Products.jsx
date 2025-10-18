@@ -31,7 +31,9 @@ export default function Products() {
     return () => (mounted = false);
   }, []);
 
-  const filtered = selected ? productos.filter(p => p.categoria === selected) : productos;
+  const filtered = selected
+    ? productos.filter(p =>p.disponible && p.categoria === selected)
+    : productos.filter(p => p.disponible);
 
   const selectCategory = (cat) => {
     if (!cat) {

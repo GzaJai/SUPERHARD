@@ -6,9 +6,11 @@ export default function ProductForm() {
   const navigate = useNavigate();
 
   const [producto, setProducto] = useState({
+    marca: "",
     nombre: "",
     precio: "",
     categoria: "",
+    disponible: true,
     stock: "",
     image: "",
     description: "",
@@ -59,6 +61,17 @@ export default function ProductForm() {
     <div className="p-8 bg-neutral-900 min-h-screen text-white">
       <h2 className="text-2xl mb-4 text-white">Agregar Producto</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-1/2">
+
+        <input
+          type="text"
+          name="marca"
+          placeholder="Marca"
+          value={producto.marca}
+          onChange={handleChange}
+          className="p-2 rounded text-white bg-neutral-800"
+        />
+
+
         <input
           type="text"
           name="nombre"
@@ -91,6 +104,19 @@ export default function ProductForm() {
             </option>
           ))}
         </select>
+        {/* Select para disponible */}
+        <select
+          name="disponible"
+          value={producto.disponible}
+          onChange={(e) =>
+            setProducto({ ...producto, disponible: e.target.value === "true" })
+          }
+          className="p-2 rounded text-white bg-neutral-800"
+        >
+          <option value={true}>Disponible</option>
+          <option value={false}>No Disponible</option>
+        </select>
+
 
         <input
           type="number"

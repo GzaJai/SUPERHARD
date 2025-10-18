@@ -29,9 +29,11 @@ public class ProductoService {
 
     public ProductoModel actualizaProducto(Long id, ProductoModel producto) {
         ProductoModel existente = productoRepository.findById(id).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        existente.setMarca(producto.getMarca());
         existente.setNombre(producto.getNombre());
         existente.setPrecio(producto.getPrecio());
         existente.setCategoria(producto.getCategoria());
+        existente.setDisponible(producto.isDisponible());
         existente.setDescription(producto.getDescription());
         existente.setImage(producto.getImage());
         existente.setStock(producto.getStock());
