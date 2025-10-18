@@ -2,60 +2,106 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Register({ setUser }) {
-  const [name, setName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [address, setAddress] = useState("")
-  const [locality, setLocality] = useState("")
-  const [province, setProvince] = useState("")
-  const [postalCode, setPostalCode] = useState("")
-  const [phone, setPhone] = useState("")
-  const [dni, setDni] = useState("")
-  const [subscribeOffers, setSubscribeOffers] = useState(false)
+  // ✅ Estado para campos de usuario
+  const [usuario, setUsuario] = useState({
+    nombre: "",
+    apellido: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    telefono: "",
+  })
+
+  // ✅ Estado para campos de dirección
+  const [direccion, setDireccion] = useState({
+    calle: "",
+    numero: "",
+    ciudad: "",
+    provincia: "",
+    codigoPostal: ""
+  })
+
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
-
   const navigate = useNavigate()
 
-  const provinces = [
+  const provincias = [
     'Ciudad Autónoma de Buenos Aires','Buenos Aires','Catamarca','Chaco','Chubut','Córdoba','Corrientes','Entre Ríos','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquén','Río Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucumán'
   ]
 
-  const handleRegister = async (e) => {
+  // 🔹 Maneja cambios en los campos de usuario
+  const handleUsuarioChange = e => {
+    const { name, value } = e.target
+    setUsuario(prev => ({ ...prev, [name]: value }))
+  }
+
+  // 🔹 Maneja cambios en los campos de dirección
+  const handleDireccionChange = e => {
+    const { name, value } = e.target
+    setDireccion(prev => ({ ...prev, [name]: value }))
+  }
+
+  // 🔹 Maneja registro
+  const handleRegister = async e => {
     e.preventDefault()
     setError("")
-
-    if (!name || !lastName || !email || !password || !confirmPassword || !address || !locality || !province || !postalCode || !phone || !dni) {
-      setError("Completa todos los campos")
-      return
-    }
-    if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden")
-      return
-    }
-
     setLoading(true)
 
+    // Validación simple de campos
+    const usuarioFields = ["nombre","apellido","email","password","confirmPassword","telefono"]
+    const direccionFields = ["calle","numero","ciudad","provincia","codigoPostal"]
+
+    for (let field of usuarioFields) {
+      if (!usuario[field]) { setError("Completa todos los campos"); setLoading(false); return }
+    }
+    for (let field of direccionFields) {
+      if (!direccion[field]) { setError("Completa todos los campos"); setLoading(false); return }
+    }
+
+    if (usuario.password !== usuario.confirmPassword) {
+      setError("Las contraseñas no coinciden")
+      setLoading(false)
+      return
+    }
+
+    const body = {
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      email: usuario.email,
+      password: usuario.password,
+      telefono: usuario.telefono,
+      direccion
+    }
+
+    console.log("Enviando body:", body) // 🔹 Log del JSON enviado
+
     try {
-      const body = { name, lastName, email, password, address, locality, province, postalCode, phone, dni, subscribeOffers }
-      const response = await fetch("http://localhost:8080/api/register", {
+      const response = await fetch("http://localhost:8080/api/usuarios/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body)
       })
-      if (!response.ok) throw new Error("Error en el servidor")
-      const data = await response.json()
+
+      console.log("Response status:", response.status)
+      const text = await response.text()
+      console.log("Response text:", text) // 🔹 Log de la respuesta
+
+      let data
+      try { data = JSON.parse(text) } catch { data = { success: false, message: text } }
+
       if (data.success) {
         const userWithRol = { ...data.user, rol: data.rol }
         if (data.token) localStorage.setItem("token", data.token)
         localStorage.setItem("user", JSON.stringify(userWithRol))
         setUser(userWithRol)
         navigate("/")
-      } else setError(data.message || "No se pudo registrar")
+      } else {
+        setError(data.message || "No se pudo registrar")
+      }
+
     } catch (err) {
-      setError(err.message || "Hubo un problema al registrarse")
+      console.error("Error fetch:", err)
+      setError("Hubo un problema al registrarse: " + err.message)
     } finally {
       setLoading(false)
     }
@@ -69,25 +115,50 @@ export default function Register({ setUser }) {
         <h2 className='text-3xl text-[#EEDA00]'>Crea tu cuenta</h2>
 
         <div className='grid grid-cols-2 gap-4 w-full'>
-          <input className={inputClass} type='text' placeholder='Nombre' value={name} onChange={e => setName(e.target.value)} />
-          <input className={inputClass} type='text' placeholder='Apellido' value={lastName} onChange={e => setLastName(e.target.value)} />
-          <input className={`${inputClass} col-span-2`} type='email' placeholder='Correo electrónico' value={email} onChange={e => setEmail(e.target.value)} />
-          <input className={inputClass} type='password' placeholder='Contraseña' value={password} onChange={e => setPassword(e.target.value)} />
-          <input className={inputClass} type='password' placeholder='Confirmar contraseña' value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
-          <input className={`${inputClass} col-span-2`} type='text' placeholder='Dirección' value={address} onChange={e => setAddress(e.target.value)} />
-          <input className={inputClass} type='text' placeholder='Localidad' value={locality} onChange={e => setLocality(e.target.value)} />
-          <select className={`${inputClass}`} value={province} onChange={e => setProvince(e.target.value)}>
-            <option value=''>Seleccioná provincia</option>
-            {provinces.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
-          <input className={inputClass} type='text' placeholder='Código Postal' value={postalCode} onChange={e => setPostalCode(e.target.value)} />
-          <input className={inputClass} type='text' placeholder='Teléfono' value={phone} onChange={e => setPhone(e.target.value)} />
-          <input className={inputClass} type='text' placeholder='DNI' value={dni} onChange={e => setDni(e.target.value)} />
-        </div>
+          {/* Campos usuario */}
+          {["nombre","apellido","email","password","confirmPassword","telefono"].map(field => (
+            <input
+              key={field}
+              name={field}
+              type={field.includes("password") ? "password" : field === "email" ? "email" : "text"}
+              placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+              className={`${inputClass} ${field === "email" ? "col-span-2" : ""}`}
+              value={usuario[field]}
+              onChange={handleUsuarioChange}
+            />
+          ))}
 
-        <div className='flex items-center gap-2 w-full text-left'>
-          <input type='checkbox' id='subscribeOffers' checked={subscribeOffers} onChange={e => setSubscribeOffers(e.target.checked)} className='ml-0' />
-          <label htmlFor='subscribeOffers'>Quiero recibir ofertas y novedades en mi correo</label>
+          {/* Campos dirección */}
+          {["calle","numero","ciudad"].map(field => (
+            <input
+              key={field}
+              name={field}
+              type="text"
+              placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+              className={inputClass}
+              value={direccion[field]}
+              onChange={handleDireccionChange}
+            />
+          ))}
+
+          <select
+            name="provincia"
+            className={inputClass}
+            value={direccion.provincia}
+            onChange={handleDireccionChange}
+          >
+            <option value=''>Seleccioná provincia</option>
+            {provincias.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+
+          <input
+            name="codigoPostal"
+            type="text"
+            placeholder="Código Postal"
+            className={inputClass}
+            value={direccion.codigoPostal}
+            onChange={handleDireccionChange}
+          />
         </div>
 
         {error && <p className='text-red-400'>{error}</p>}
