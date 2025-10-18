@@ -1,6 +1,7 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { Outlet } from "react-router-dom";
+import Chatbot from "../components/Bot/ChatBot";
 
 export default function PublicLayout({ user, setUser }) {
   return (
@@ -10,6 +11,7 @@ export default function PublicLayout({ user, setUser }) {
         <Outlet /> {/* Renderiza las rutas hijas aquí */}
       </main>
       <Footer />
+      <Chatbot />
     </div>
   );
 }
