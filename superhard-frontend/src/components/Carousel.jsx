@@ -37,7 +37,7 @@ function Carousel() {
         <button
           onClick={prevSlide}
           disabled={maxIndex === 0}
-          className={`absolute left-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white w-14 h-14 flex items-center justify-center rounded-full hover:bg-[#505050] shadow-lg transition-all duration-300 cursor-pointer z-10 ${
+          className={`absolute left-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white w-14 h-14 items-center justify-center rounded-full hover:bg-[#505050] shadow-lg transition-all duration-300 cursor-pointer z-10 hidden md:flex ${
             maxIndex === 0 ? "opacity-40 cursor-not-allowed hover:bg-[#585858]" : ""
           }`}
         >
@@ -45,7 +45,7 @@ function Carousel() {
         </button>
 
         {/* Contenedor del carrusel */}
-        <div className="overflow-hidden w-full">
+        <div className=" overflow-x-auto whitespace-nowrap w-full"  style={{scrollbarWidth: "none", msOverflowStyle: "none"}}>
           <div
             className="flex transition-transform duration-500 ease-in-out"
             style={{
@@ -95,7 +95,7 @@ function Carousel() {
         <button
           onClick={nextSlide}
           disabled={maxIndex === 0}
-          className={`absolute right-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white w-14 h-14 flex items-center justify-center rounded-full hover:bg-[#505050] shadow-lg transition-all duration-300 cursor-pointer z-10 ${
+          className={`absolute right-4 top-1/2 -translate-y-1/2 bg-[#585858] text-white w-14 h-14 items-center justify-center rounded-full hover:bg-[#505050] shadow-lg transition-all duration-300 cursor-pointer z-10 hidden md:flex ${
             maxIndex === 0 ? "opacity-40 cursor-not-allowed hover:bg-[#585858]" : ""
           }`}
         >
