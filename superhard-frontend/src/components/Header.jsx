@@ -192,18 +192,18 @@ function Header({ user, setUser }) {
             )}
           </div>
 
-          <button className="text-[#EEDA00] px-4 text-lg border-r hover:cursor-pointer">
+          <button className="text-[#EEDA00] px-4 text-lg md:border-r hover:cursor-pointer">
             OFERTAS
           </button>
 
           {/* Resto de categorías */}
           {categories.map((c) => (
-            <Link key={c} to={`/products?categoria=${encodeURIComponent(c)}`} className="px-3 py-1 rounded hover:text-[#EEDA00] cursor-pointer transition">
+            <Link key={c} to={`/products?categoria=${encodeURIComponent(c)}`} className="px-3 py-1 rounded hover:text-[#EEDA00] cursor-pointer transition hidden md:inline-block">
               {c}
             </Link>
           ))}
 
-          <button className="text-[#EEDA00] px-4 text-lg border-l hover:cursor-pointer">
+          <button className="text-[#EEDA00] px-4 text-lg md:border-l hover:cursor-pointer">
             Arma tu PC
           </button>
         </nav>
