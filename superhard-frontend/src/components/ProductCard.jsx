@@ -1,28 +1,37 @@
 import { Link } from "react-router-dom";
 
-function ProductCard({ p }) {
+function ProductCard({ id, img, title, price, oldPrice }) {
   return (
-    <div className="bg-[#2F2F2F] rounded-lg p-3 flex flex-col justify-center items-center shadow hover:shadow-lg hover:scale-[1.01] transition-transform duration-300">
-      <img
-        src={p.img}
-        alt={p.nombre}
-        className="w-full h-32 object-contain mb-2"
-      />
-      <h3 className="text-sm font-semibold mb-1 text-center text-[#EEDA00]">
-        {p.nombre}
-      </h3>
-      <p className="text-[#EEDA00] font-bold text-sm mb-1 text-center">
-        {p.precio}
-      </p>
-      <p className="text-xs text-gray-300 mb-2 text-center">
-        ¡Mismo precio en 6 cuotas fijas!
-      </p>
-      <Link
-        to={`/product/${p.id}`}
-        className="block text-center bg-[#EEDA00] text-black font-semibold px-2 py-1 rounded-md hover:opacity-90 transition text-sm w-full"
-      >
-        Ver Producto
-      </Link>
+    <div className="bg-[#282828] text-white rounded-2xl shadow-lg p-4 flex flex-col justify-between w-[290px] h-[23rem] hover:scale-105 transition-transform duration-300">
+
+      
+      {/* Contenido superior */}
+      <div className="flex flex-col items-center flex-grow">
+        <img 
+          src={img} 
+          alt={title} 
+          className="w-full h-40 object-contain rounded-xl mb-3 bg-neutral-700" 
+        />
+        <h3 className="text-lg font-semibold text-center truncate w-full">{title}</h3>
+      </div>
+
+      {/* Precios y botón siempre al final */}
+      <div className="flex flex-col gap-2 mt-4">
+        <div className="flex items-center justify-center gap-2">
+          {oldPrice && (
+            <p className="text-gray-400 line-through text-sm">${oldPrice}</p>
+          )}
+          <p className="text-xl font-bold text-green-400">${price}</p>
+        </div>
+
+        <Link 
+          to={`/product/${id}`}
+          className="bg-green-900 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-xl shadow-md transition-colors w-full text-center"
+        >
+          Ver Producto
+        </Link>
+      </div>
+
     </div>
   );
 }

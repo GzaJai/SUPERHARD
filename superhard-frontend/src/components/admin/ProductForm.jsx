@@ -1,27 +1,39 @@
-// src/components/admin/ProductForm.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function ProductForm() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const [producto, setProducto] = useState({
+    marca: "",
     nombre: "",
     precio: "",
     categoria: "",
+    disponible: true,
     stock: "",
     image: "",
+    description: "",
   });
 
   const categorias = [
-    "Procesadores",
-    "Placas de video",
-    "Memorias RAM",
-    "Periféricos",
-    "Gabinetes",
-    "Componentes",
-    "Periféricos",
-    "Accesorios",
-    "Portátiles",
-    "Monitores",
+    "Procesadores", "Placas de video", "Memorias RAM", "Periféricos",
+    "Gabinetes", "Componentes", "Accesorios", "Portátiles", "Monitores",
   ];
+
+  useEffect(() => {
+    if (!id) return; // Crear nuevo producto
+    const fetchProducto = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/productos/${id}`);
+        const data = await res.json();
+        setProducto(data);
+      } catch (err) {
+        console.error("Error al cargar producto:", err);
+      }
+    };
+    fetchProducto();
+  }, [id]);
 
   const handleChange = (e) => {
     setProducto({ ...producto, [e.target.name]: e.target.value });
@@ -29,25 +41,37 @@ export default function ProductForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await fetch("http://localhost:8080/api/productos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(producto),
-    });
-    alert("Producto agregado correctamente");
-    setProducto({
-      nombre: "",
-      precio: "",
-      categoria: "",
-      stock: "",
-      image: "",
-    });
-  };
+    const method = id ? "PUT" : "POST";
+    const url = id 
+      ? `http://localhost:8080/api/productos/${id}` 
+      : "http://localhost:8080/api/productos";
 
+    try {
+      await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(producto),
+      });
+      navigate("/admin/products");
+    } catch (err) {
+      console.error("Error guardando producto:", err);
+    }
+  };
   return (
     <div className="p-8 bg-neutral-900 min-h-screen text-white">
       <h2 className="text-2xl mb-4 text-white">Agregar Producto</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-1/2">
+
+        <input
+          type="text"
+          name="marca"
+          placeholder="Marca"
+          value={producto.marca}
+          onChange={handleChange}
+          className="p-2 rounded text-white bg-neutral-800"
+        />
+
+
         <input
           type="text"
           name="nombre"
@@ -80,6 +104,19 @@ export default function ProductForm() {
             </option>
           ))}
         </select>
+        {/* Select para disponible */}
+        <select
+          name="disponible"
+          value={producto.disponible}
+          onChange={(e) =>
+            setProducto({ ...producto, disponible: e.target.value === "true" })
+          }
+          className="p-2 rounded text-white bg-neutral-800"
+        >
+          <option value={true}>Disponible</option>
+          <option value={false}>No Disponible</option>
+        </select>
+
 
         <input
           type="number"
@@ -97,6 +134,15 @@ export default function ProductForm() {
           value={producto.image}
           onChange={handleChange}
           className="p-2 rounded text-white bg-neutral-800"
+        />
+
+        <textarea
+          name="description"
+          placeholder="Descripción"
+          value={producto.description}
+          onChange={handleChange}
+          className="p-2 rounded text-white bg-neutral-800"
+        
         />
 
         <button
