@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import CryptoPaymentForm from './CryptoPaymentForm';
 
 // ✅ Para Vite: import.meta.env (NO process.env)
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
@@ -159,7 +160,12 @@ const BuyPage = () => {
       cartItems,
       total,
       date: new Date().toLocaleString(),
-      paymentMethod: paymentMethod === "tarjeta" ? "Tarjeta (Stripe)" : "Mercado Pago",
+      paymentMethod: 
+        paymentMethod === "tarjeta" 
+          ? "Tarjeta (Stripe)" 
+          : paymentMethod === "crypto"
+          ? "Criptomonedas"
+          : "Mercado Pago",
       paymentId: paymentId
     };
     
@@ -206,12 +212,26 @@ const BuyPage = () => {
             />
             <span>Tarjeta de Crédito/Débito</span>
           </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              value="crypto"
+              checked={paymentMethod === "crypto"}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="w-4 h-4"
+            />
+            <span>💎 Criptomonedas</span>
+          </label>
         </div>
 
         {paymentMethod === "tarjeta" && (
           <Elements stripe={stripePromise}>
             <StripePaymentForm total={total} onSuccess={handlePaymentSuccess} />
           </Elements>
+        )}
+
+        {paymentMethod === "crypto" && (
+          <CryptoPaymentForm total={total} onSuccess={handlePaymentSuccess} />
         )}
 
         {paymentMethod === "mercadoPago" && (
