@@ -10,6 +10,8 @@ export default function ProductForm() {
     nombre: "",
     precio: "",
     categoria: "",
+    socket: "",
+    ddr: "",
     disponible: true,
     stock: "",
     image: "",
@@ -17,8 +19,16 @@ export default function ProductForm() {
   });
 
   const categorias = [
-    "Procesadores", "Placas de video", "Memorias RAM", "Periféricos",
+    "Procesadores", "Motherboards" , "Placas de video", "Memorias RAM", "Periféricos",
     "Gabinetes", "Componentes", "Accesorios", "Portátiles", "Monitores",
+  ];
+
+  const socket = [
+    "LGA 1200", "LGA 1700", "AM4", "AM5",
+  ];
+
+  const ddr = [
+    "DDR4", "DDR5",
   ];
 
   useEffect(() => {
@@ -36,7 +46,29 @@ export default function ProductForm() {
   }, [id]);
 
   const handleChange = (e) => {
-    setProducto({ ...producto, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // Creamos una copia actualizada del producto
+    const updatedProducto = { ...producto, [name]: value };
+
+    // ✅ Lógica de dependencia: Si cambia el socket, actualiza el DDR
+    if (name === "socket") {
+      switch (value) {
+        case "AM5":
+        case "LGA 1700":
+          updatedProducto.ddr = "DDR5";
+          break;
+        case "AM4":
+        case "LGA 1200":
+          updatedProducto.ddr = "DDR4";
+          break;
+        default:
+          updatedProducto.ddr = ""; // Si no hay socket, se limpia el DDR
+          break;
+      }
+    }
+
+    setProducto(updatedProducto);
   };
 
   const handleSubmit = async (e) => {
@@ -104,6 +136,40 @@ export default function ProductForm() {
             </option>
           ))}
         </select>
+        {/* Campos condicionales */}
+        {(producto.categoria === "Procesadores" || producto.categoria === "Placas madre" || producto.categoria === "Memorias RAM") && (
+          <select
+            name="socket"
+            value={producto.socket}
+            onChange={handleChange}
+            className="p-2 rounded text-white bg-neutral-800"
+          >
+            <option value="">--Selecciona Socket--</option>
+            {socket.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        )}
+
+        {producto.categoria === "Memorias RAM" && (
+          <select
+            name="ddr"
+            value={producto.ddr}
+            onChange={handleChange}
+            className="p-2 rounded text-white bg-neutral-800"
+          >
+            <option value="">--Selecciona DDR--</option>
+            {ddr.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
+            ))}
+          </select>
+        )}
+
+
         {/* Select para disponible */}
         <select
           name="disponible"

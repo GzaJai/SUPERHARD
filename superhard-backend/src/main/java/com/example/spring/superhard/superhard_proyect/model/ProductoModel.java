@@ -21,6 +21,8 @@ public class ProductoModel {
     @Lob
     private String description;
     private String categoria;
+    private String ddr;
+    private String socket;
     private boolean disponible;
     private int stock;
     private String image;

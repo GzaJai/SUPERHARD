@@ -38,6 +38,8 @@ public class ProductoService {
         existente.setDescription(producto.getDescription());
         existente.setImage(producto.getImage());
         existente.setStock(producto.getStock());
+        existente.setSocket(producto.getSocket());
+        existente.setDdr(producto.getDdr());
         
         return productoRepository.save(existente);
     }
