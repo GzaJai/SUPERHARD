@@ -1,23 +1,16 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 import CryptoPaymentForm from './CryptoPaymentForm';
 
-// ✅ Para Vite: import.meta.env (NO process.env)
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 const MERCADOPAGO_KEY = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
-// Inicializa Mercado Pago con tu clave pública
 initMercadoPago(MERCADOPAGO_KEY, { locale: 'es-AR' });
 const stripePromise = loadStripe(STRIPE_KEY);
-
-// Debug
-console.log("Stripe Key:", STRIPE_KEY ? "✅ Cargada" : "❌ No encontrada");
-console.log("MercadoPago Key:", MERCADOPAGO_KEY ? "✅ Cargada" : "❌ No encontrada");
-console.log("API URL:", API_URL);
 
 const CARD_ELEMENT_OPTIONS = {
   style: {
@@ -26,15 +19,10 @@ const CARD_ELEMENT_OPTIONS = {
       fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
       fontSmoothing: "antialiased",
       fontSize: "16px",
-      "::placeholder": {
-        color: "#aab7c4",
-      },
+      "::placeholder": { color: "#aab7c4" },
       iconColor: "#ffffff",
     },
-    invalid: {
-      color: "#fa755a",
-      iconColor: "#fa755a",
-    },
+    invalid: { color: "#fa755a", iconColor: "#fa755a" },
   },
   hidePostalCode: false,
 };
@@ -44,12 +32,6 @@ const StripePaymentForm = ({ total, onSuccess }) => {
   const elements = useElements();
   const [message, setMessage] = useState("");
   const [processing, setProcessing] = useState(false);
-
-  // Debug: Verifica que Stripe se cargó
-  useEffect(() => {
-    console.log("Stripe cargado:", stripe ? "✅ Sí" : "⏳ Esperando...");
-    console.log("Elements cargado:", elements ? "✅ Sí" : "⏳ Esperando...");
-  }, [stripe, elements]);
 
   const handlePayment = async (e) => {
     e.preventDefault();
@@ -63,30 +45,19 @@ const StripePaymentForm = ({ total, onSuccess }) => {
     setMessage("");
 
     try {
-      // ✅ CORREGIDO: Para Vite usa import.meta.env
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+      const apiUrl = import.meta.env.VITE_API_URL || "/api";
       const res = await fetch(`${apiUrl}/payments/create-payment-intent`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          amount: Math.round(total * 100), // Monto en centavos
-          currency: "ars" // Especifica la moneda
+          amount: Math.round(total * 100),
+          currency: "ars"
         })
       });
 
-      if (!res.ok) {
-        throw new Error("Error al crear el pago en el servidor");
-      }
+      if (!res.ok) throw new Error("Error al crear el pago en el servidor");
 
-      const { clientSecret, originalAmount, originalCurrency, exchangeRate } = await res.json();
-
-      // Mostrar información de conversión si aplica
-      if (originalCurrency === "ars") {
-        const arsAmount = (originalAmount / 100).toFixed(2);
-        console.log(`💱 Conversión: ${arsAmount} ARS → ${(total * exchangeRate).toFixed(2)} USD`);
-      }
-
-      // 2️⃣ Confirmar pago con Stripe
+      const { clientSecret } = await res.json();
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: elements.getElement(CardElement),
@@ -97,6 +68,7 @@ const StripePaymentForm = ({ total, onSuccess }) => {
         setMessage(`Error: ${error.message}`);
       } else if (paymentIntent.status === "succeeded") {
         setMessage("¡Pago exitoso! ✅");
+        // Pasar el ID del pago de Stripe
         onSuccess(paymentIntent.id);
       }
     } catch (err) {
@@ -108,10 +80,9 @@ const StripePaymentForm = ({ total, onSuccess }) => {
 
   return (
     <form onSubmit={handlePayment} className="flex flex-col gap-4">
-      {/* Indicador de carga de Stripe */}
       {!stripe && (
         <div className="p-4 bg-yellow-900/50 border border-yellow-600 rounded-lg text-yellow-200">
-          ⏳ Cargando Stripe... Si esto tarda mucho, verifica tu clave en el .env
+          ⏳ Cargando Stripe...
         </div>
       )}
       
@@ -132,15 +103,6 @@ const StripePaymentForm = ({ total, onSuccess }) => {
           {message}
         </p>
       )}
-
-      {/* Tarjetas de prueba */}
-      <div className="mt-4 p-3 bg-gray-700 rounded text-sm">
-        <p className="font-bold mb-2">🧪 Tarjetas de prueba:</p>
-        <p>✅ Éxito: 4242 4242 4242 4242</p>
-        <p>❌ Error: 4000 0000 0000 0002</p>
-        <p>🔐 Requiere autenticación: 4000 0025 0000 3155</p>
-        <p>Fecha: cualquier fecha futura | CVV: cualquier 3 dígitos</p>
-      </div>
     </form>
   );
 };
@@ -154,6 +116,7 @@ const BuyPage = () => {
   const [isLoadingMp, setIsLoadingMp] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("mercadoPago");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem("cartItems")) || [];
@@ -162,26 +125,40 @@ const BuyPage = () => {
     setTotal(subtotal);
   }, []);
 
-  // Efecto para crear la preferencia de Mercado Pago
+  // ✅ NUEVO: Detectar callback de MercadoPago
   useEffect(() => {
-    // Resetea el preferenceId si se cambia de método de pago
+    const status = searchParams.get("status");
+    const paymentId = searchParams.get("payment_id");
+    
+    if (status === "approved" && paymentId) {
+      // El pago fue aprobado, guardar la venta
+      const savedCart = JSON.parse(localStorage.getItem("cartItems")) || [];
+      if (savedCart.length > 0) {
+        handlePaymentSuccess(paymentId);
+      }
+    } else if (status === "failure") {
+      alert("El pago fue rechazado. Intenta nuevamente.");
+    } else if (status === "pending") {
+      alert("Tu pago está pendiente de aprobación.");
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     if (paymentMethod !== "mercadoPago") {
       setPreferenceId(null);
       setMpError(null);
       return;
     }
 
-    // Solo intentar crear la preferencia si hay items en el carrito
     if (cartItems.length > 0) {
       setIsLoadingMp(true);
       setMpError(null);
-      setPreferenceId(null); // Resetea el ID anterior
+      setPreferenceId(null);
 
+      // ✅ Incluir URLs de retorno
       fetch(`${API_URL}/payments/create-mercadopago-preference`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: cartItems.map(item => ({
             title: item.nombre,
@@ -189,11 +166,16 @@ const BuyPage = () => {
             unit_price: parseFloat(item.precio),
             currency_id: "ARS",
           })),
+          back_urls: {
+            success: `${window.location.origin}/buy?status=approved`,
+            failure: `${window.location.origin}/buy?status=failure`,
+            pending: `${window.location.origin}/buy?status=pending`
+          },
+          auto_return: "approved"
         }),
       })
       .then(response => {
         if (!response.ok) {
-          // Si la respuesta no es 2xx, lanza un error para que lo capture el .catch()
           return response.json().then(err => { throw new Error(err.message || 'Error del servidor') });
         }
         return response.json();
@@ -209,32 +191,42 @@ const BuyPage = () => {
         setIsLoadingMp(false);
       });
     }
-  }, [paymentMethod, cartItems]); // Se ejecuta cuando cambia el método o el carrito
+  }, [paymentMethod, cartItems]);
 
-  const sendConfirmationEmail = async (orderData) => {
-    // Aquí asumimos que el email del usuario está en localStorage.
-    // En una app real, lo obtendrías del estado de autenticación (Context, Redux, etc.).
+  const saveOrderToBackend = async (orderData) => {
     const user = JSON.parse(localStorage.getItem("user"));
-    const email = user?.email || "cliente@example.com"; // Email de respaldo
+    if (!user || !user.id) {
+      console.error("No se pudo guardar la orden: Usuario no logueado.");
+      return;
+    }
 
     try {
-      const response = await fetch(`${API_URL}/email/send-order-confirmation`, {
+      const response = await fetch(`${API_URL}/payments/confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, orderData }),
+        body: JSON.stringify({
+          usuarioId: user.id,
+          productos: JSON.stringify(orderData.cartItems),
+          total: orderData.total,
+          metodoPago: orderData.paymentMethod,
+          pagoId: orderData.paymentId,
+          email: user.email || "cliente@example.com",
+          customerName: `${user.nombre || ''} ${user.apellido || ''}`.trim(),
+          cartItems: orderData.cartItems
+        }),
       });
+
       if (response.ok) {
-        console.log("📧 Correo de confirmación enviado.");
+        console.log("✅ Venta guardada y email enviado");
       } else {
-        console.error("Error al enviar el correo de confirmación.");
+        console.error("Error al guardar la venta");
       }
     } catch (error) {
-      console.error("Error de red al intentar enviar el correo:", error);
+      console.error("Error de red al guardar la venta:", error);
     }
   };
 
   const handlePaymentSuccess = (paymentId = null) => {
-    // Guardar resumen de orden y limpiar carrito
     const orderData = {
       cartItems,
       total,
@@ -249,10 +241,12 @@ const BuyPage = () => {
     };
     
     localStorage.setItem("orderSummary", JSON.stringify(orderData));
+    
+    // Guardar en backend (incluye envío de email)
+    saveOrderToBackend(orderData);
+    
+    // Limpiar carrito DESPUÉS de guardar
     localStorage.removeItem("cartItems");
-
-    // Enviar correo de confirmación
-    sendConfirmationEmail(orderData);
     
     setShowAnimation(true);
     setTimeout(() => navigate("/order-summary"), 3000);
@@ -268,7 +262,6 @@ const BuyPage = () => {
         </div>
       )}
 
-      {/* Formulario de pago */}
       <div className="flex-1 bg-[#353535] rounded-xl p-6 flex flex-col gap-4 shadow-lg z-10">
         <h2 className="text-2xl font-bold text-[#EEDA00]">Método de pago</h2>
         
@@ -294,6 +287,7 @@ const BuyPage = () => {
             />
             <span>Tarjeta de Crédito/Débito</span>
           </label>
+          
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="radio"
@@ -321,7 +315,12 @@ const BuyPage = () => {
             {isLoadingMp && <p>Generando link de pago...</p>}
             {mpError && <p className="text-red-500">{mpError}</p>}
             {preferenceId && !isLoadingMp && (
-              <Wallet initialization={{ preferenceId }} customization={{ texts:{ valueProp: 'smart_option'}}} />
+              <>
+                <Wallet initialization={{ preferenceId }} customization={{ texts:{ valueProp: 'smart_option'}}} />
+                <p className="text-sm text-gray-400 mt-2">
+                  Serás redirigido a MercadoPago para completar el pago
+                </p>
+              </>
             )}
             {!isLoadingMp && !preferenceId && !mpError && cartItems.length === 0 && (
               <p className="text-gray-400">Agrega productos a tu carrito para generar el link de pago.</p>
@@ -330,7 +329,6 @@ const BuyPage = () => {
         )}
       </div>
 
-      {/* Resumen del carrito */}
       <div className="w-full md:w-1/3 bg-[#353535] rounded-xl p-6 flex flex-col gap-4 shadow-lg h-fit z-10">
         <h2 className="text-xl font-bold text-[#EEDA00] mb-2">Resumen del pedido</h2>
         

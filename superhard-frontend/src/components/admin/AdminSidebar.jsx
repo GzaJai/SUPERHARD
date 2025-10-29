@@ -10,6 +10,7 @@ export default function AdminSidebar() {
         <Link to="/" className="hover:bg-neutral-700 px-3 py-2 rounded"> 🏠Pagina Principal </Link>
         <Link to="/admin/products" className="hover:bg-neutral-700 px-3 py-2 rounded">📦 Productos</Link>
         <Link to="/admin/add" className="hover:bg-neutral-700 px-3 py-2 rounded">➕ Agregar Producto</Link>
+        <Link to="/admin/sales" className="hover:bg-neutral-700 px-3 py-2 rounded">📈 Ventas</Link>
         <Link to="/admin/users" className="hover:bg-neutral-700 px-3 py-2 rounded">👥 Usuarios</Link>
       </nav>
     </div>

@@ -1,13 +1,41 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 const OrderSummary = () => {
   const [order, setOrder] = useState(null);
   const [isMpSuccess, setIsMpSuccess] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // ✅ 1. AÑADIR LA FUNCIÓN PARA GUARDAR LA VENTA
+  const saveOrderToDatabase = async (orderData) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || !user.id) {
+      console.error("No se pudo guardar la orden de MP: Usuario no logueado.");
+      return;
+    }
+
+    const venta = {
+      usuario: { id: user.id },
+      productos: JSON.stringify(orderData.cartItems),
+      total: orderData.total,
+      metodoPago: orderData.paymentMethod,
+      pagoId: orderData.paymentId,
+    };
+
+    try {
+      await fetch(`${API_URL}/api/ventas`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(venta),
+      });
+      console.log("✅ Orden de Mercado Pago guardada en la base de datos.");
+    } catch (error) {
+      console.error("Error al guardar la orden de MP en la base de datos:", error);
+    }
+  };
 
   useEffect(() => {
     const sendConfirmationEmail = async (orderData) => {
@@ -48,6 +76,9 @@ const OrderSummary = () => {
 
       // Intentamos enviar un correo de notificación simple
       sendConfirmationEmail(orderData);
+
+      // ✅ 2. LLAMAR A LA FUNCIÓN DE GUARDADO
+      saveOrderToDatabase(orderData);
 
       setIsMpSuccess(true);
       // Limpiamos el carrito ya que el pago fue exitoso

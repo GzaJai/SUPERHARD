@@ -1,5 +1,9 @@
 package com.example.spring.superhard.superhard_proyect.controllers;
 
+import com.example.spring.superhard.superhard_proyect.model.UsuarioModel;
+import com.example.spring.superhard.superhard_proyect.model.Venta;
+import com.example.spring.superhard.superhard_proyect.repository.VentaRepository;
+import com.example.spring.superhard.superhard_proyect.service.EmailService;
 import com.mercadopago.MercadoPagoConfig;
 import com.mercadopago.client.preference.PreferenceBackUrlsRequest;
 import com.mercadopago.client.preference.PreferenceItemRequest;
@@ -208,4 +212,80 @@ public class PaymentController {
     public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
         return ResponseEntity.ok("Webhook received");
     }
+
+    // ✅ AGREGAR ESTE MÉTODO AL FINAL DE TU PaymentController.java
+
+@Autowired
+private VentaRepository ventaRepository;
+
+@Autowired
+private EmailService emailService;
+
+@PostMapping("/confirm")
+public ResponseEntity<?> confirmarPago(@RequestBody Map<String, Object> payload) {
+    try {
+        System.out.println("📥 Confirmando pago con payload: " + payload);
+
+        // Validar datos obligatorios
+        if (!payload.containsKey("usuarioId") || !payload.containsKey("total")) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", "Faltan datos obligatorios: usuarioId o total"
+            ));
+        }
+
+        // Extraer datos del payload
+        Long usuarioId = ((Number) payload.get("usuarioId")).longValue();
+        String productos = (String) payload.get("productos");
+        Double total = ((Number) payload.get("total")).doubleValue();
+        String metodoPago = (String) payload.get("metodoPago");
+        String pagoId = (String) payload.get("pagoId");
+        String email = (String) payload.get("email");
+
+        // Crear la venta
+        Venta venta = new Venta();
+        UsuarioModel usuario = new UsuarioModel();
+        usuario.setId(usuarioId);
+        venta.setUsuario(usuario);
+        venta.setProductos(productos);
+        venta.setTotal(total);
+        venta.setMetodoPago(metodoPago);
+        venta.setPagoId(pagoId);
+        venta.setEstadoPago("Pagado"); // ✅ Establecer estado
+
+        // Guardar en BD
+        Venta ventaGuardada = ventaRepository.save(venta);
+
+        System.out.println("✅ Venta guardada exitosamente - ID: " + ventaGuardada.getId() + 
+                          " | Total: $" + total + " | Método: " + metodoPago);
+
+        // Enviar email de confirmación (asíncrono)
+        if (email != null && !email.isEmpty()) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> orderData = new HashMap<>();
+            orderData.put("cartItems", payload.get("cartItems"));
+            orderData.put("total", total);
+            orderData.put("paymentMethod", metodoPago);
+            orderData.put("customerName", payload.getOrDefault("customerName", "Cliente"));
+            
+            emailService.enviarEmailConfirmacionCompra(email, orderData);
+            System.out.println("📧 Email de confirmación enviado a: " + email);
+        }
+
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "message", "Venta registrada exitosamente",
+            "ventaId", ventaGuardada.getId()
+        ));
+
+    } catch (Exception e) {
+        System.err.println("❌ Error al confirmar pago: " + e.getMessage());
+        e.printStackTrace();
+        return ResponseEntity.status(500).body(Map.of(
+            "success", false,
+            "message", "Error al registrar la venta: " + e.getMessage()
+        ));
+    }
+}
+
 }
