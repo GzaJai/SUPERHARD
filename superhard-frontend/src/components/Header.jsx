@@ -21,7 +21,7 @@ function Header({ user, setUser }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (search.trim() !== "") {
-      navigate(`/search?search=${encodeURIComponent(search.trim())}`);
+      navigate(`/products?search=${encodeURIComponent(search.trim())}`);
       setSearch("");
     }
   };

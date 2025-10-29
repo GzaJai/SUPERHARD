@@ -10,18 +10,19 @@ export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const selected = searchParams.get('categoria') || null;
+  const searchQuery = searchParams.get('search') || null;
 
+  // Cargar productos iniciales y categorías
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       try {
         setLoading(true);
-        const [prods, cats] = await Promise.all([api.getProductos(), api.getCategorias()]);
+        const cats = await api.getCategorias();
         if (!mounted) return;
-        setProductos(prods || []);
         setCategorias(cats || []);
       } catch (err) {
-        console.error('Error cargando productos/categorías', err);
+        console.error('Error cargando categorías', err);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -31,16 +32,48 @@ export default function Products() {
     return () => (mounted = false);
   }, []);
 
-  const filtered = selected
-    ? productos.filter(p =>p.disponible && p.categoria === selected)
-    : productos.filter(p => p.disponible);
+  // Cargar productos según búsqueda o categoría
+  useEffect(() => {
+    let mounted = true;
+    const loadProductos = async () => {
+      try {
+        setLoading(true);
+        let prods = [];
+
+        if (searchQuery) {
+          // Si hay búsqueda, llamar al endpoint de búsqueda
+          prods = await api.buscarProductos(searchQuery);
+        } else if (selected) {
+          // Si hay categoría seleccionada
+          prods = await api.getProductosPorCategoria(selected);
+        } else {
+          // Cargar todos los productos
+          prods = await api.getProductos();
+        }
+
+        if (!mounted) return;
+        setProductos(prods || []);
+      } catch (err) {
+        console.error('Error cargando productos', err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    loadProductos();
+    return () => (mounted = false);
+  }, [searchQuery, selected]);
+
+  const filtered = productos.filter(p => p.disponible);
 
   const selectCategory = (cat) => {
     if (!cat) {
       searchParams.delete('categoria');
+      searchParams.delete('search');
       setSearchParams(searchParams);
       return;
     }
+    searchParams.delete('search');
     setSearchParams({ categoria: cat });
   };
 
@@ -56,7 +89,7 @@ export default function Products() {
           <li>
             <button
               onClick={() => selectCategory(null)}
-              className={`w-full text-left px-3 py-2 rounded ${!selected ? 'bg-yellow-400 text-black' : 'hover:bg-neutral-700'}`}
+              className={`w-full text-left px-3 py-2 rounded ${!selected && !searchQuery ? 'bg-yellow-400 text-black' : 'hover:bg-neutral-700'}`}
             >
               Todas
             </button>
@@ -76,19 +109,30 @@ export default function Products() {
 
       {/* Grid de productos */}
       <section className="ml-[18rem]">
-        <h2 className="text-2xl font-bold mb-4">Productos {selected ? `- ${selected}` : ''}</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {filtered.map(p => (
-            <ProductCard
-              key={p.id}
-              id={p.id}
-              img={p.image}
-              title={p.nombre}
-              price={typeof p.precio === 'string' ? p.precio.replace(/[^0-9.,]/g,'') : p.precio}
-              oldPrice={p.oldPrice}
-            />
-          ))}
-        </div>
+        <h2 className="text-2xl font-bold mb-4">
+          {searchQuery 
+            ? `Resultados de búsqueda: "${searchQuery}"` 
+            : selected 
+              ? `Productos - ${selected}` 
+              : 'Todos los productos'}
+        </h2>
+
+        {filtered.length === 0 ? (
+          <p className="text-gray-400 text-lg">No se encontraron productos</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {filtered.map(p => (
+              <ProductCard
+                key={p.id}
+                id={p.id}
+                img={p.image}
+                title={p.nombre}
+                price={typeof p.precio === 'string' ? p.precio.replace(/[^0-9.,]/g,'') : p.precio}
+                oldPrice={p.oldPrice}
+              />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

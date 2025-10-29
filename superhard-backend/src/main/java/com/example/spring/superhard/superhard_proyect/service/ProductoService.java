@@ -3,7 +3,6 @@ package com.example.spring.superhard.superhard_proyect.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-
 import com.example.spring.superhard.superhard_proyect.model.ProductoModel;
 import com.example.spring.superhard.superhard_proyect.repository.ProductoRepository;
 
@@ -28,7 +27,9 @@ public class ProductoService {
     }
 
     public ProductoModel actualizaProducto(Long id, ProductoModel producto) {
-        ProductoModel existente = productoRepository.findById(id).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        ProductoModel existente = productoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        
         existente.setMarca(producto.getMarca());
         existente.setNombre(producto.getNombre());
         existente.setPrecio(producto.getPrecio());
@@ -37,17 +38,22 @@ public class ProductoService {
         existente.setDescription(producto.getDescription());
         existente.setImage(producto.getImage());
         existente.setStock(producto.getStock());
+        
         return productoRepository.save(existente);
     }
 
     public ProductoModel obtieneProductoPorId(Long id) {
-        return productoRepository.findById(id).orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+        return productoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
     }
 
+    // ✅ OPTIMIZADO: Usa el método del repositorio
     public List<ProductoModel> obtieneProductosPorCategoria(String categoria) {
-        return productoRepository.findAll().stream()
-                .filter(p -> p.getCategoria().equalsIgnoreCase(categoria))
-                .toList();
+        return productoRepository.findByCategoria(categoria);
     }
 
+    // ✅ OPTIMIZADO: Usa el método del repositorio
+    public List<ProductoModel> buscarProductos(String query) {
+        return productoRepository.buscarProductos(query);
+    }
 }
