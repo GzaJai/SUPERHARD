@@ -2,9 +2,8 @@ import { Link } from "react-router-dom";
 
 function ProductCard({ id, img, title, price, oldPrice }) {
   return (
-    <div className="bg-[#282828] text-white rounded-2xl shadow-lg p-4 flex flex-col justify-between w-[290px] h-[23rem] hover:scale-105 transition-transform duration-300">
+    <div className="bg-[#282828] text-white rounded-2xl shadow-lg p-4 flex flex-col justify-between w-full max-w-[290px] mx-auto h-[23rem] hover:scale-105 transition-transform duration-300">
 
-      
       {/* Contenido superior */}
       <div className="flex flex-col items-center flex-grow">
         <img 
@@ -12,7 +11,7 @@ function ProductCard({ id, img, title, price, oldPrice }) {
           alt={title} 
           className="w-full h-40 object-contain rounded-xl mb-3 bg-neutral-700" 
         />
-        <h3 className="text-lg font-semibold text-center truncate w-full">{title}</h3>
+        <h3 className="text-lg font-semibold text-center line-clamp-2 w-full px-2">{title}</h3>
       </div>
 
       {/* Precios y botón siempre al final */}
