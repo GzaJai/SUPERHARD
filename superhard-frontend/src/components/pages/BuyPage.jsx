@@ -211,6 +211,28 @@ const BuyPage = () => {
     }
   }, [paymentMethod, cartItems]); // Se ejecuta cuando cambia el método o el carrito
 
+  const sendConfirmationEmail = async (orderData) => {
+    // Aquí asumimos que el email del usuario está en localStorage.
+    // En una app real, lo obtendrías del estado de autenticación (Context, Redux, etc.).
+    const user = JSON.parse(localStorage.getItem("user"));
+    const email = user?.email || "cliente@example.com"; // Email de respaldo
+
+    try {
+      const response = await fetch(`${API_URL}/email/send-order-confirmation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, orderData }),
+      });
+      if (response.ok) {
+        console.log("📧 Correo de confirmación enviado.");
+      } else {
+        console.error("Error al enviar el correo de confirmación.");
+      }
+    } catch (error) {
+      console.error("Error de red al intentar enviar el correo:", error);
+    }
+  };
+
   const handlePaymentSuccess = (paymentId = null) => {
     // Guardar resumen de orden y limpiar carrito
     const orderData = {
@@ -228,6 +250,9 @@ const BuyPage = () => {
     
     localStorage.setItem("orderSummary", JSON.stringify(orderData));
     localStorage.removeItem("cartItems");
+
+    // Enviar correo de confirmación
+    sendConfirmationEmail(orderData);
     
     setShowAnimation(true);
     setTimeout(() => navigate("/order-summary"), 3000);

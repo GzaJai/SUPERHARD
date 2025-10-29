@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+
 const OrderSummary = () => {
   const [order, setOrder] = useState(null);
   const [isMpSuccess, setIsMpSuccess] = useState(false);
@@ -8,15 +10,50 @@ const OrderSummary = () => {
   const location = useLocation();
 
   useEffect(() => {
+    const sendConfirmationEmail = async (orderData) => {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const email = user?.email || "cliente@example.com";
+
+      try {
+        await fetch(`${API_URL}/email/send-order-confirmation`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, orderData }),
+        });
+        console.log("📧 Correo de confirmación de MP enviado.");
+      } catch (error) {
+        console.error("Error al enviar correo de MP:", error);
+      }
+    };
+
     // Detectar redirección de Mercado Pago
     const searchParams = new URLSearchParams(location.search);
     const mpStatus = searchParams.get("status");
     const paymentId = searchParams.get("payment_id");
 
     if (mpStatus === "approved") {
+      // Si es un éxito de MP, construimos la orden aquí para el correo.
+      // NOTA: El carrito ya no existe, por lo que esta es una reconstrucción parcial.
+      // Leemos el carrito y total guardados antes del checkout de MP.
+      const savedCart = JSON.parse(localStorage.getItem('mp_checkout_cart') || '[]');
+      const savedTotal = JSON.parse(localStorage.getItem('mp_checkout_total') || '0');
+
+      const orderData = {
+        cartItems: savedCart,
+        total: savedTotal,
+        date: new Date().toLocaleString(),
+        paymentMethod: "Mercado Pago",
+        paymentId: paymentId,
+      };
+
+      // Intentamos enviar un correo de notificación simple
+      sendConfirmationEmail(orderData);
+
       setIsMpSuccess(true);
       // Limpiamos el carrito ya que el pago fue exitoso
       localStorage.removeItem("cartItems");
+      localStorage.removeItem('mp_checkout_cart'); // Limpieza
+      localStorage.removeItem('mp_checkout_total'); // Limpieza
       return; // No intentamos cargar desde localStorage
     }
 
