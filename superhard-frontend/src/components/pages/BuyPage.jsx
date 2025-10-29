@@ -2,16 +2,21 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
 import CryptoPaymentForm from './CryptoPaymentForm';
 
 // ✅ Para Vite: import.meta.env (NO process.env)
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const MERCADOPAGO_KEY = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
+// Inicializa Mercado Pago con tu clave pública
+initMercadoPago(MERCADOPAGO_KEY, { locale: 'es-AR' });
 const stripePromise = loadStripe(STRIPE_KEY);
 
 // Debug
 console.log("Stripe Key:", STRIPE_KEY ? "✅ Cargada" : "❌ No encontrada");
+console.log("MercadoPago Key:", MERCADOPAGO_KEY ? "✅ Cargada" : "❌ No encontrada");
 console.log("API URL:", API_URL);
 
 const CARD_ELEMENT_OPTIONS = {
@@ -144,6 +149,9 @@ const BuyPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [showAnimation, setShowAnimation] = useState(false);
+  const [preferenceId, setPreferenceId] = useState(null);
+  const [mpError, setMpError] = useState(null);
+  const [isLoadingMp, setIsLoadingMp] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("mercadoPago");
   const navigate = useNavigate();
 
@@ -153,6 +161,55 @@ const BuyPage = () => {
     const subtotal = savedCart.reduce((acc, item) => acc + parseFloat(item.precio) * item.cantidad, 0);
     setTotal(subtotal);
   }, []);
+
+  // Efecto para crear la preferencia de Mercado Pago
+  useEffect(() => {
+    // Resetea el preferenceId si se cambia de método de pago
+    if (paymentMethod !== "mercadoPago") {
+      setPreferenceId(null);
+      setMpError(null);
+      return;
+    }
+
+    // Solo intentar crear la preferencia si hay items en el carrito
+    if (cartItems.length > 0) {
+      setIsLoadingMp(true);
+      setMpError(null);
+      setPreferenceId(null); // Resetea el ID anterior
+
+      fetch(`${API_URL}/payments/create-mercadopago-preference`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items: cartItems.map(item => ({
+            title: item.nombre,
+            quantity: item.cantidad,
+            unit_price: parseFloat(item.precio),
+            currency_id: "ARS",
+          })),
+        }),
+      })
+      .then(response => {
+        if (!response.ok) {
+          // Si la respuesta no es 2xx, lanza un error para que lo capture el .catch()
+          return response.json().then(err => { throw new Error(err.message || 'Error del servidor') });
+        }
+        return response.json();
+      })
+      .then(data => {
+        setPreferenceId(data.preferenceId);
+      })
+      .catch(error => {
+        console.error("Error al crear preferencia de MP:", error.message);
+        setMpError("No se pudo generar el link de pago. Intenta de nuevo.");
+      })
+      .finally(() => {
+        setIsLoadingMp(false);
+      });
+    }
+  }, [paymentMethod, cartItems]); // Se ejecuta cuando cambia el método o el carrito
 
   const handlePaymentSuccess = (paymentId = null) => {
     // Guardar resumen de orden y limpiar carrito
@@ -235,12 +292,16 @@ const BuyPage = () => {
         )}
 
         {paymentMethod === "mercadoPago" && (
-          <button
-            className="mt-4 bg-[#EEDA00] text-black font-bold px-6 py-3 rounded-xl shadow-lg hover:opacity-90 transition-all duration-200"
-            onClick={() => alert("Aquí se integraría Mercado Pago")}
-          >
-            Pagar con Mercado Pago - ${total.toFixed(2)} ARS
-          </button>
+          <div className="mt-4 flex flex-col items-center">
+            {isLoadingMp && <p>Generando link de pago...</p>}
+            {mpError && <p className="text-red-500">{mpError}</p>}
+            {preferenceId && !isLoadingMp && (
+              <Wallet initialization={{ preferenceId }} customization={{ texts:{ valueProp: 'smart_option'}}} />
+            )}
+            {!isLoadingMp && !preferenceId && !mpError && cartItems.length === 0 && (
+              <p className="text-gray-400">Agrega productos a tu carrito para generar el link de pago.</p>
+            )}
+          </div>
         )}
       </div>
 

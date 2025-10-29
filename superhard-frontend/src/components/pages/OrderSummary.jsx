@@ -1,11 +1,25 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const OrderSummary = () => {
   const [order, setOrder] = useState(null);
+  const [isMpSuccess, setIsMpSuccess] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
+    // Detectar redirección de Mercado Pago
+    const searchParams = new URLSearchParams(location.search);
+    const mpStatus = searchParams.get("status");
+    const paymentId = searchParams.get("payment_id");
+
+    if (mpStatus === "approved") {
+      setIsMpSuccess(true);
+      // Limpiamos el carrito ya que el pago fue exitoso
+      localStorage.removeItem("cartItems");
+      return; // No intentamos cargar desde localStorage
+    }
+
     const savedOrder = localStorage.getItem("orderSummary");
     if (savedOrder) {
       try {
@@ -14,7 +28,7 @@ const OrderSummary = () => {
         console.error("Error al cargar el resumen:", err);
       }
     }
-  }, []);
+  }, [location.search]);
 
   const handleBackHome = () => {
     // 🧹 Limpiar toda la información
@@ -27,7 +41,34 @@ const OrderSummary = () => {
     navigate("/");
   };
 
-  if (!order) {
+  // Renderizado especial para éxito de Mercado Pago
+  if (isMpSuccess) {
+    const searchParams = new URLSearchParams(location.search);
+    return (
+      <div className="min-h-screen bg-[#494949] text-white flex flex-col items-center p-6 py-12">
+        <div className="mb-8 text-center animate-fade-in">
+          <div className="text-7xl mb-4">✅</div>
+          <h1 className="text-4xl font-bold text-[#EEDA00] mb-2">
+            ¡Compra realizada con éxito!
+          </h1>
+          <p className="text-gray-300">Gracias por tu compra a través de Mercado Pago</p>
+        </div>
+        <div className="bg-[#353535] rounded-xl shadow-2xl p-8 w-full max-w-md text-center">
+          <h3 className="text-lg font-semibold mb-2 text-green-400">✓ Pago confirmado</h3>
+          <p className="text-sm text-gray-300"><strong>ID de transacción:</strong> {searchParams.get("payment_id")}</p>
+          <p className="text-sm text-gray-300"><strong>Método de pago:</strong> Mercado Pago</p>
+          <button
+            onClick={handleBackHome}
+            className="mt-6 bg-[#EEDA00] text-black px-8 py-3 rounded-xl font-bold hover:opacity-90 transition shadow-lg"
+          >
+            Volver al inicio
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!order && !isMpSuccess) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-white bg-[#494949] p-6">
         <div className="bg-[#353535] rounded-xl p-8 text-center max-w-md">
