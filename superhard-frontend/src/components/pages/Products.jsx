@@ -38,6 +38,9 @@ export default function Products() {
   // Cargar productos
   useEffect(() => {
     let mounted = true;
+    // Scroll to top cuando cambia la página o los filtros
+    window.scrollTo(0, 0);
+
     const loadProductos = async () => {
       try {
         setLoading(true);
@@ -62,7 +65,7 @@ export default function Products() {
     };
     loadProductos();
     return () => (mounted = false);
-  }, [searchQuery, selected]);
+  }, [searchQuery, selected, currentPage]);
 
   const filtered = productos.filter((p) => p.disponible);
 

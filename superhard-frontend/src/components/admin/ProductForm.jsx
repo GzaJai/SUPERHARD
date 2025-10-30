@@ -21,7 +21,7 @@ export default function ProductForm() {
 
   const categorias = [
     "Procesadores", "Motherboards" , "Placas de video", "Memorias RAM", "Periféricos",
-    "Gabinetes", "Componentes", "Accesorios", "Portátiles", "Monitores",
+    "Gabinetes", "Fuentes de poder","Componentes", "Accesorios", "Portátiles", "Monitores",
   ];
 
   const socket = [
