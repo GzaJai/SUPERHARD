@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 function ProductCard({ id, img, title, price, oldPrice }) {
   return (
-    <div className="bg-[#282828] text-white rounded-2xl shadow-lg p-4 flex flex-col justify-between w-full max-w-[290px] mx-auto h-[23rem] hover:scale-105 transition-transform duration-300">
+    <div className="bg-[#282828] text-white rounded-2xl shadow-lg p-4 flex flex-col justify-between w-full max-w-[290px] mx-auto h-[23rem] hover:scale-105 transition-transform duration-300 cursor-pointer">
 
       {/* Contenido superior */}
       <div className="flex flex-col items-center flex-grow">
@@ -23,6 +23,7 @@ function ProductCard({ id, img, title, price, oldPrice }) {
           <p className={`text-xl font-bold ${oldPrice ? 'text-green-400' : 'text-white'}`}>
             ${parseFloat(price).toFixed(2)}
           </p>
+          <p className="text-xl font-bold text-[#EEDA00]">${price}</p>
         </div>
 
         <Link 

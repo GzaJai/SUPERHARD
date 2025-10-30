@@ -1,58 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../ProductCard';
-import api from '../../services/api';
+import { getCategorias, getProductos, getProductosPorCategoria, buscarProductos } from '../../services/api';
+import Pagination from '../Pagination';
 
 export default function Products() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ currentPage: 0, totalPages: 1 });
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const currentPage = parseInt(searchParams.get('page') || '0', 10);
   const selected = searchParams.get('categoria') || null;
   const searchQuery = searchParams.get('search') || null;
 
-  // Cargar productos iniciales y categorías
+  // Cargar categorías
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       try {
         setLoading(true);
-        const cats = await api.getCategorias();
+        const cats = await getCategorias();
         if (!mounted) return;
         setCategorias(cats || []);
       } catch (err) {
         console.error('Error cargando categorías', err);
       } finally {
-        if (mounted) setLoading(false);
+        // El loading se setea a false en el useEffect de productos
       }
     };
-
     load();
     return () => (mounted = false);
   }, []);
 
-  // Cargar productos según búsqueda o categoría
+  // Cargar productos con paginación
   useEffect(() => {
     let mounted = true;
     const loadProductos = async () => {
       try {
         setLoading(true);
-        let prods = [];
+        let response;
+        const pageOptions = { page: currentPage, limit: 12 };
 
         if (searchQuery) {
           // Si hay búsqueda, llamar al endpoint de búsqueda
-          prods = await api.buscarProductos(searchQuery);
+          response = await buscarProductos(searchQuery, pageOptions);
         } else if (selected) {
           // Si hay categoría seleccionada
-          prods = await api.getProductosPorCategoria(selected);
+          response = await getProductosPorCategoria(selected, pageOptions);
         } else {
           // Cargar todos los productos
-          prods = await api.getProductos();
+          response = await getProductos(pageOptions);
         }
 
         if (!mounted) return;
-        setProductos(prods || []);
+        setProductos(response.content || []);
+        setPagination({
+          currentPage: response.number,
+          totalPages: response.totalPages,
+        });
       } catch (err) {
         console.error('Error cargando productos', err);
       } finally {
@@ -62,19 +69,27 @@ export default function Products() {
 
     loadProductos();
     return () => (mounted = false);
-  }, [searchQuery, selected]);
+  }, [searchQuery, selected, currentPage]);
 
-  const filtered = productos.filter(p => p.disponible);
+  const filtered = productos.filter((p) => p.disponible);
 
   const selectCategory = (cat) => {
     if (!cat) {
       searchParams.delete('categoria');
       searchParams.delete('search');
+      searchParams.set('page', '0'); // Reset page
       setSearchParams(searchParams);
       return;
     }
     searchParams.delete('search');
-    setSearchParams({ categoria: cat });
+    searchParams.set('categoria', cat);
+    searchParams.set('page', '0'); // Reset page
+    setSearchParams(searchParams);
+  };
+
+  const handlePageChange = (newPage) => {
+    searchParams.set('page', String(newPage));
+    setSearchParams(searchParams);
   };
 
   if (loading) return <p className="text-white p-6">Cargando productos...</p>;
@@ -148,6 +163,14 @@ export default function Products() {
                   );
                 })}
               </div>
+            )}
+
+            {!loading && filtered.length > 0 && (
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                onPageChange={handlePageChange}
+              />
             )}
           </section>
         </div>
