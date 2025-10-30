@@ -14,6 +14,8 @@ import ProductList from "../components/admin/ProductList";
 import ProductForm from "../components/admin/ProductForm";
 import UserList from "../components/admin/UserList";
 import PublicLayout from "../layouts/PublicLayout";
+import SalesList from "../components/admin/SalesList";
+import BuildPC from "../components/pages/BuildPC";
 
 export default function AppRouter({ user, setUser }) {
   return (
@@ -29,6 +31,7 @@ export default function AppRouter({ user, setUser }) {
               <Route path='/forgot' element={<ForgotPassword />} />
               <Route path='/buy' element={<BuyPage />} />
               <Route path='/order-summary' element={<OrderSummary />} />
+              <Route path="/build-pc" element={<BuildPC />} />
             </Route>
             
             {/* Admin */}
@@ -37,6 +40,8 @@ export default function AppRouter({ user, setUser }) {
               <Route path="add" element={<ProductForm />} />
               <Route path="edit/:id" element={<ProductForm/>} />
               <Route path="users" element={<UserList />} />
+              <Route path="sales" element={<SalesList />} />
+
             </Route>
           </Routes>
     </Router>

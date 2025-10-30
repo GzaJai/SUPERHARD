@@ -21,7 +21,7 @@ function Header({ user, setUser }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (search.trim() !== "") {
-      navigate(`/search?search=${encodeURIComponent(search.trim())}`);
+      navigate(`/products?search=${encodeURIComponent(search.trim())}`);
       setSearch("");
     }
   };
@@ -214,9 +214,12 @@ function Header({ user, setUser }) {
             </Link>
           ))}
 
-          <button className="text-[#EEDA00] px-4 text-lg md:border-l hover:cursor-pointer">
+          <Link 
+            to="/build-pc" 
+            className="text-[#EEDA00] px-4 text-lg md:border-l hover:cursor-pointer"
+          >
             Arma tu PC
-          </button>
+          </Link>
         </nav>
       </header>
 

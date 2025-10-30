@@ -1,297 +1,384 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { initMercadoPago, Wallet } from "@mercadopago/sdk-react";
+import CryptoPaymentForm from './CryptoPaymentForm';
+
+const STRIPE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+const MERCADOPAGO_KEY = import.meta.env.VITE_MERCADOPAGO_PUBLIC_KEY;
+const API_URL = import.meta.env.VITE_API_URL || "/api";
+
+initMercadoPago(MERCADOPAGO_KEY, { locale: 'es-AR' });
+const stripePromise = loadStripe(STRIPE_KEY);
+
+const CARD_ELEMENT_OPTIONS = {
+  style: {
+    base: {
+      color: "#ffffff",
+      fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+      fontSmoothing: "antialiased",
+      fontSize: "16px",
+      "::placeholder": { color: "#aab7c4" },
+      iconColor: "#ffffff",
+    },
+    invalid: { color: "#fa755a", iconColor: "#fa755a" },
+  },
+  hidePostalCode: false,
+};
+
+const StripePaymentForm = ({ total, onSuccess }) => {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [message, setMessage] = useState("");
+  const [processing, setProcessing] = useState(false);
+
+  const handlePayment = async (e) => {
+    e.preventDefault();
+    
+    if (!stripe || !elements) {
+      setMessage("Stripe aún no está listo. Por favor, intenta de nuevo.");
+      return;
+    }
+
+    setProcessing(true);
+    setMessage("");
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "/api";
+      const res = await fetch(`${apiUrl}/payments/create-payment-intent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          amount: Math.round(total * 100),
+          currency: "ars"
+        })
+      });
+
+      if (!res.ok) throw new Error("Error al crear el pago en el servidor");
+
+      const { clientSecret } = await res.json();
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+        },
+      });
+
+      if (error) {
+        setMessage(`Error: ${error.message}`);
+      } else if (paymentIntent.status === "succeeded") {
+        setMessage("¡Pago exitoso! ✅");
+        // Pasar el ID del pago de Stripe
+        onSuccess(paymentIntent.id);
+      }
+    } catch (err) {
+      setMessage(`Error: ${err.message}`);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handlePayment} className="flex flex-col gap-4">
+      {!stripe && (
+        <div className="p-4 bg-yellow-900/50 border border-yellow-600 rounded-lg text-yellow-200">
+          ⏳ Cargando Stripe...
+        </div>
+      )}
+      
+      <div className="p-4 bg-[#353535] rounded-lg border border-gray-600 min-h-[50px]">
+        <CardElement options={CARD_ELEMENT_OPTIONS} />
+      </div>
+      
+      <button
+        type="submit"
+        disabled={!stripe || processing}
+        className="mt-4 bg-[#EEDA00] text-black font-bold px-6 py-3 rounded-xl shadow-lg hover:opacity-90 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {processing ? "Procesando..." : `Pagar ${total.toFixed(2)} ARS`}
+      </button>
+      
+      {message && (
+        <p className={`mt-2 ${message.includes("exitoso") ? "text-green-500" : "text-red-500"}`}>
+          {message}
+        </p>
+      )}
+    </form>
+  );
+};
 
 const BuyPage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [total, setTotal] = useState(0);
   const [showAnimation, setShowAnimation] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [preferenceId, setPreferenceId] = useState(null);
+  const [mpError, setMpError] = useState(null);
+  const [isLoadingMp, setIsLoadingMp] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("mercadoPago");
   const navigate = useNavigate();
-
-  const [contact, setContact] = useState({
-    email: "",
-    province: "",
-    city: "",
-    postal: "",
-    firstName: "",
-    lastName: "",
-    address: "",
-    department: "",
-  });
-
-  const [payment, setPayment] = useState({
-    cardNumber: "",
-    nameOnCard: "",
-    expiryMonth: "",
-    expiryYear: "",
-    cvv: "",
-  });
-
-  // ✅ Nuevo estado para método de pago
-  const [paymentMethod, setPaymentMethod] = useState("mercadoPago"); // "mercadoPago" o "tarjeta"
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem("cartItems")) || [];
     setCartItems(savedCart);
 
+    // Calcula el total considerando los descuentos
     const subtotal = savedCart.reduce((acc, item) => {
-      const price = parseFloat(item.precio.toString().replace(/[^0-9.]/g, ""));
-      return acc + price * item.cantidad;
+      const price = parseFloat(item.precio);
+      const finalPrice = item.descuento > 0 ? price * (1 - item.descuento / 100) : price;
+      return acc + finalPrice * item.cantidad;
     }, 0);
 
     setTotal(subtotal);
-  }, []);
+  }, []); 
 
-  const handleContactChange = (e) => {
-    setContact({ ...contact, [e.target.name]: e.target.value });
-  };
-
-  const handlePaymentChange = (e) => {
-    setPayment({ ...payment, [e.target.name]: e.target.value });
-  };
-
-  const validateFields = () => {
-    const newErrors = {};
-
-    // Validaciones de contacto (igual que antes)
-    if (!contact.email.trim()) newErrors.email = "El correo electrónico es obligatorio.";
-    if (!contact.province.trim()) newErrors.province = "La provincia es obligatoria.";
-    if (!contact.city.trim()) newErrors.city = "La ciudad es obligatoria.";
-    if (!contact.postal.trim()) newErrors.postal = "El código postal es obligatorio.";
-    if (!contact.firstName.trim()) newErrors.firstName = "El nombre es obligatorio.";
-    if (!contact.lastName.trim()) newErrors.lastName = "El apellido es obligatorio.";
-    if (!contact.address.trim()) newErrors.address = "La dirección es obligatoria.";
-
-    // Validaciones de tarjeta SOLO si se elige tarjeta
-    if (paymentMethod === "tarjeta") {
-      if (!payment.cardNumber.trim()) newErrors.cardNumber = "El número de tarjeta es obligatorio.";
-      if (!payment.nameOnCard.trim()) newErrors.nameOnCard = "El nombre del titular es obligatorio.";
-      if (!payment.expiryMonth.trim()) newErrors.expiryMonth = "El mes es obligatorio.";
-      if (!payment.expiryYear.trim()) newErrors.expiryYear = "El año es obligatorio.";
-      if (!payment.cvv.trim()) newErrors.cvv = "El CVV es obligatorio.";
-      // Aquí podés agregar las regex de validación como antes
+  // ✅ NUEVO: Detectar callback de MercadoPago
+  useEffect(() => {
+    const status = searchParams.get("status");
+    const paymentId = searchParams.get("payment_id");
+    
+    if (status === "approved" && paymentId) {
+      // El pago fue aprobado, guardar la venta
+      const savedCart = JSON.parse(localStorage.getItem("cartItems")) || [];
+      if (savedCart.length > 0) {
+        handlePaymentSuccess(paymentId);
+      }
+    } else if (status === "failure") {
+      alert("El pago fue rechazado. Intenta nuevamente.");
+    } else if (status === "pending") {
+      alert("Tu pago está pendiente de aprobación.");
     }
+  }, [searchParams]);
 
-    return newErrors;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const validationErrors = validateFields();
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+  useEffect(() => {
+    if (paymentMethod !== "mercadoPago") {
+      setPreferenceId(null);
+      setMpError(null);
       return;
     }
 
-    setErrors({});
+    if (cartItems.length > 0) {
+      setIsLoadingMp(true);
+      setMpError(null);
+      setPreferenceId(null);
 
+      // ✅ Incluir URLs de retorno
+      fetch(`${API_URL}/payments/create-mercadopago-preference`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: cartItems.map(item => ({
+            title: item.nombre,
+            quantity: item.cantidad,
+            // ✅ Usar el precio con descuento para la preferencia de MP
+            unit_price: item.descuento > 0 
+              ? parseFloat(item.precio) * (1 - item.descuento / 100)
+              : parseFloat(item.precio),
+            currency_id: "ARS",
+          })),
+          back_urls: {
+            success: `${window.location.origin}/buy?status=approved`,
+            failure: `${window.location.origin}/buy?status=failure`,
+            pending: `${window.location.origin}/buy?status=pending`
+          },
+          auto_return: "approved"
+        }),
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => { throw new Error(err.message || 'Error del servidor') });
+        }
+        return response.json();
+      })
+      .then(data => {
+        setPreferenceId(data.preferenceId);
+      })
+      .catch(error => {
+        console.error("Error al crear preferencia de MP:", error.message);
+        setMpError("No se pudo generar el link de pago. Intenta de nuevo.");
+      })
+      .finally(() => {
+        setIsLoadingMp(false);
+      });
+    }
+  }, [paymentMethod, cartItems]);
+
+  const saveOrderToBackend = async (orderData) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || !user.id) {
+      console.error("No se pudo guardar la orden: Usuario no logueado.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/payments/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          usuarioId: user.id,
+          productos: JSON.stringify(orderData.cartItems),
+          total: orderData.total,
+          metodoPago: orderData.paymentMethod,
+          pagoId: orderData.paymentId,
+          email: user.email || "cliente@example.com",
+          customerName: `${user.nombre || ''} ${user.apellido || ''}`.trim(),
+          cartItems: orderData.cartItems
+        }),
+      });
+
+      if (response.ok) {
+        console.log("✅ Venta guardada y email enviado");
+      } else {
+        console.error("Error al guardar la venta");
+      }
+    } catch (error) {
+      console.error("Error de red al guardar la venta:", error);
+    }
+  };
+
+  const handlePaymentSuccess = (paymentId = null) => {
     const orderData = {
-      contact,
-      paymentMethod,
-      payment: paymentMethod === "tarjeta" ? payment : null,
       cartItems,
       total,
       date: new Date().toLocaleString(),
+      paymentMethod: 
+        paymentMethod === "tarjeta" 
+          ? "Tarjeta (Stripe)" 
+          : paymentMethod === "crypto"
+          ? "Criptomonedas"
+          : "Mercado Pago",
+      paymentId: paymentId
     };
-
+    
     localStorage.setItem("orderSummary", JSON.stringify(orderData));
+    
+    // Guardar en backend (incluye envío de email)
+    saveOrderToBackend(orderData);
+    
+    // Limpiar carrito DESPUÉS de guardar
     localStorage.removeItem("cartItems");
-
+    
     setShowAnimation(true);
-    setTimeout(() => navigate("/order-summary"), 5000);
+    setTimeout(() => navigate("/order-summary"), 3000);
   };
-
-  const inputClass = (name) =>
-    `w-full p-2 bg-[#353535] text-[#fff] border-b-2 ${
-      errors[name] ? "border-red-500 focus:border-red-400" : "border-[#EEDA00] focus:border-white"
-    } outline-none transition-colors duration-200`;
-
-  const camposDireccion = [
-    { name: "province", placeholder: "Provincia" },
-    { name: "city", placeholder: "Ciudad" },
-    { name: "postal", placeholder: "Código Postal" },
-    { name: "firstName", placeholder: "Nombre" },
-    { name: "lastName", placeholder: "Apellido" },
-    { name: "address", placeholder: "Dirección" },
-    { name: "department", placeholder: "Departamento / Piso (opcional)" },
-  ];
 
   return (
     <div className="relative min-h-screen bg-[#494949] text-white px-6 py-10 flex flex-col md:flex-row gap-6 overflow-hidden">
       {showAnimation && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden bg-[#EEDA00] animate-wave-fill flex items-center justify-center">
-          <h1 className="text-5xl md:text-6xl font-black text-black italic animate-fade-in">
+        <div className="fixed inset-0 z-[9999] bg-[#EEDA00] flex items-center justify-center">
+          <h1 className="text-5xl font-black text-black italic animate-pulse">
             ¡Gracias por su compra!
           </h1>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex-1 bg-[#353535] rounded-xl p-6 flex flex-col gap-4 shadow-lg z-10">
+      <div className="flex-1 bg-[#353535] rounded-xl p-6 flex flex-col gap-4 shadow-lg z-10">
         <h2 className="text-2xl font-bold text-[#EEDA00]">Método de pago</h2>
-
-        {/* Selección de método */}
+        
         <div className="flex gap-4 mb-4">
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="radio"
-              name="paymentMethod"
               value="mercadoPago"
               checked={paymentMethod === "mercadoPago"}
               onChange={(e) => setPaymentMethod(e.target.value)}
+              className="w-4 h-4"
             />
-            Mercado Pago
+            <span>Mercado Pago</span>
           </label>
-          <label className="flex items-center gap-2">
+          
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="radio"
-              name="paymentMethod"
               value="tarjeta"
               checked={paymentMethod === "tarjeta"}
               onChange={(e) => setPaymentMethod(e.target.value)}
+              className="w-4 h-4"
             />
-            Tarjeta
+            <span>Tarjeta de Crédito/Débito</span>
+          </label>
+          
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              value="crypto"
+              checked={paymentMethod === "crypto"}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="w-4 h-4"
+            />
+            <span>💎 Criptomonedas</span>
           </label>
         </div>
 
-        <h3 className="text-xl font-semibold text-[#EEDA00]">Información de contacto</h3>
-        <input
-          type="email"
-          name="email"
-          placeholder="Correo electrónico"
-          value={contact.email}
-          onChange={handleContactChange}
-          className={inputClass("email")}
-        />
-        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
-
-        <h3 className="text-xl font-semibold text-[#EEDA00]">Dirección de entrega</h3>
-        {camposDireccion.map((f) => (
-          <div key={f.name}>
-            <input
-              type="text"
-              name={f.name}
-              placeholder={f.placeholder}
-              value={contact[f.name]}
-              onChange={handleContactChange}
-              className={inputClass(f.name)}
-            />
-            {errors[f.name] && <p className="text-red-500 text-sm">{errors[f.name]}</p>}
-          </div>
-        ))}
-
-        {/* Solo mostrar campos de tarjeta si eligió tarjeta */}
         {paymentMethod === "tarjeta" && (
+          <Elements stripe={stripePromise}>
+            <StripePaymentForm total={total} onSuccess={handlePaymentSuccess} />
+          </Elements>
+        )}
+
+        {paymentMethod === "crypto" && (
+          <CryptoPaymentForm total={total} onSuccess={handlePaymentSuccess} />
+        )}
+
+        {paymentMethod === "mercadoPago" && (
+          <div className="mt-4 flex flex-col items-center">
+            {isLoadingMp && <p>Generando link de pago...</p>}
+            {mpError && <p className="text-red-500">{mpError}</p>}
+            {preferenceId && !isLoadingMp && (
+              <>
+                <Wallet initialization={{ preferenceId }} customization={{ texts:{ valueProp: 'smart_option'}}} />
+                <p className="text-sm text-gray-400 mt-2">
+                  Serás redirigido a MercadoPago para completar el pago
+                </p>
+              </>
+            )}
+            {!isLoadingMp && !preferenceId && !mpError && cartItems.length === 0 && (
+              <p className="text-gray-400">Agrega productos a tu carrito para generar el link de pago.</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="w-full md:w-1/3 bg-[#353535] rounded-xl p-6 flex flex-col gap-4 shadow-lg h-fit z-10">
+        <h2 className="text-xl font-bold text-[#EEDA00] mb-2">Resumen del pedido</h2>
+        
+        {cartItems.length === 0 ? (
+          <p className="text-gray-400">Tu carrito está vacío</p>
+        ) : (
           <>
-            <h3 className="text-xl font-semibold text-[#EEDA00]">Información de tarjeta</h3>
-            <input
-              type="text"
-              name="cardNumber"
-              placeholder="Número de tarjeta (16 dígitos)"
-              value={payment.cardNumber}
-              onChange={handlePaymentChange}
-              className={inputClass("cardNumber")}
-              maxLength={16}
-            />
-            {errors.cardNumber && <p className="text-red-500 text-sm">{errors.cardNumber}</p>}
-
-            <input
-              type="text"
-              name="nameOnCard"
-              placeholder="Nombre en la tarjeta"
-              value={payment.nameOnCard}
-              onChange={handlePaymentChange}
-              className={inputClass("nameOnCard")}
-            />
-            {errors.nameOnCard && <p className="text-red-500 text-sm">{errors.nameOnCard}</p>}
-
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  name="expiryMonth"
-                  placeholder="Mes (MM)"
-                  value={payment.expiryMonth}
-                  onChange={handlePaymentChange}
-                  className={inputClass("expiryMonth")}
-                  maxLength={2}
+            {cartItems.map((product) => (
+              <div key={product.id} className="flex justify-between items-center gap-4 bg-[#494949] p-3 rounded-lg">
+                <img
+                  src={product.image}
+                  alt={product.nombre}
+                  className="w-16 h-16 object-contain rounded-lg bg-white p-1"
                 />
-                {errors.expiryMonth && <p className="text-red-500 text-sm">{errors.expiryMonth}</p>}
+                <div className="flex-1">
+                  <p className="font-semibold">{product.nombre}</p>
+                  <p className="text-sm text-gray-400">Cantidad: {product.cantidad}</p>
+                </div>
+                <div className="font-bold text-[#EEDA00] text-right">
+                  {product.descuento > 0 ? (
+                    <>
+                      <p>${(parseFloat(product.precio) * (1 - product.descuento / 100) * product.cantidad).toFixed(2)}</p>
+                      <p className="text-sm text-gray-500 line-through font-normal">
+                        ${(parseFloat(product.precio) * product.cantidad).toFixed(2)}
+                      </p>
+                    </>
+                  ) : (
+                    <p>${(parseFloat(product.precio) * product.cantidad).toFixed(2)}</p>
+                  )}
+                </div>
               </div>
-
-              <div className="flex-1">
-                <input
-                  type="text"
-                  name="expiryYear"
-                  placeholder="Año (YY o YYYY)"
-                  value={payment.expiryYear}
-                  onChange={handlePaymentChange}
-                  className={inputClass("expiryYear")}
-                  maxLength={4}
-                />
-                {errors.expiryYear && <p className="text-red-500 text-sm">{errors.expiryYear}</p>}
-              </div>
-
-              <div className="flex-1">
-                <input
-                  type="text"
-                  name="cvv"
-                  placeholder="CVV"
-                  value={payment.cvv}
-                  onChange={handlePaymentChange}
-                  className={inputClass("cvv")}
-                  maxLength={4}
-                />
-                {errors.cvv && <p className="text-red-500 text-sm">{errors.cvv}</p>}
-              </div>
+            ))}
+            
+            <div className="flex justify-between font-bold text-xl pt-4 border-t border-gray-600 text-[#EEDA00]">
+              <span>Total:</span>
+              <span>${total.toFixed(2)} ARS</span>
             </div>
           </>
         )}
-
-        <button
-          type="submit"
-          className="mt-4 bg-[#EEDA00] text-black font-bold px-6 py-3 rounded-xl shadow-lg hover:opacity-90 cursor-pointer transition-all duration-200"
-        >
-          Finalizar compra
-        </button>
-      </form>
-
-      {/* Resumen del carrito */}
-      <div className="w-full md:w-1/3 bg-[#353535] rounded-xl p-6 flex flex-col gap-4 shadow-lg h-fit z-10">
-        {cartItems.map((product) => (
-          <div key={product.id} className="flex justify-between items-center gap-4 bg-[#353535] p-2 rounded-lg">
-            <img src={product.image} alt={product.nombre} className="w-20 h-20 object-contain rounded-xl bg-white p-2" />
-            <div className="flex-1">{product.nombre}</div>
-            <div className="font-bold">
-              {product.precio} x {product.cantidad}
-            </div>
-          </div>
-        ))}
-
-        <div className="flex justify-between font-bold text-lg pt-4 border-t border-gray-400">
-          <span>Subtotal:</span>
-          <span>${total.toFixed(3)}</span>
-        </div>
-        <div className="flex justify-between font-bold text-lg">
-          <span>Envío:</span>
-          <span>$0</span>
-        </div>
       </div>
-
-      <style>
-        {`
-          @keyframes fade-in {
-            0% { opacity: 0; transform: scale(0.95); }
-            100% { opacity: 1; transform: scale(1); }
-          }
-          .animate-fade-in { animation: fade-in 1.5s ease-out forwards; }
-
-          @keyframes wave-fill {
-            0% { transform: translateY(100%); }
-            100% { transform: translateY(0%); }
-          }
-          .animate-wave-fill { animation: wave-fill 2.5s ease-in-out forwards; }
-        `}
-      </style>
     </div>
   );
 };
