@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../ProductCard';
-import { getCategorias, getProductos, getProductosPorCategoria, buscarProductos } from '../../services/api';
-import Pagination from '../Pagination';
+import api from '../../services/api';
 
 export default function Products() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState({ currentPage: 0, totalPages: 1 });
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const currentPage = parseInt(searchParams.get('page') || '0', 10);
   const selected = searchParams.get('categoria') || null;
   const searchQuery = searchParams.get('search') || null;
+
+  // Paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const productsPerPage = 16;
 
   // Cargar categorías
   useEffect(() => {
@@ -21,160 +22,152 @@ export default function Products() {
     const load = async () => {
       try {
         setLoading(true);
-        const cats = await getCategorias();
+        const cats = await api.getCategorias();
         if (!mounted) return;
         setCategorias(cats || []);
       } catch (err) {
         console.error('Error cargando categorías', err);
       } finally {
-        // El loading se setea a false en el useEffect de productos
+        if (mounted) setLoading(false);
       }
     };
     load();
     return () => (mounted = false);
   }, []);
 
-  // Cargar productos con paginación
+  // Cargar productos
   useEffect(() => {
     let mounted = true;
     const loadProductos = async () => {
       try {
         setLoading(true);
-        let response;
-        const pageOptions = { page: currentPage, limit: 12 };
+        let prods = [];
 
         if (searchQuery) {
-          // Si hay búsqueda, llamar al endpoint de búsqueda
-          response = await buscarProductos(searchQuery, pageOptions);
+          prods = await api.buscarProductos(searchQuery);
         } else if (selected) {
-          // Si hay categoría seleccionada
-          response = await getProductosPorCategoria(selected, pageOptions);
+          prods = await api.getProductosPorCategoria(selected);
         } else {
-          // Cargar todos los productos
-          response = await getProductos(pageOptions);
+          prods = await api.getProductos();
         }
 
         if (!mounted) return;
-        setProductos(response.content || []);
-        setPagination({
-          currentPage: response.number,
-          totalPages: response.totalPages,
-        });
+        setProductos(prods || []);
+        setCurrentPage(1); // resetear a la primera página al cambiar filtro
       } catch (err) {
         console.error('Error cargando productos', err);
       } finally {
         if (mounted) setLoading(false);
       }
     };
-
     loadProductos();
     return () => (mounted = false);
-  }, [searchQuery, selected, currentPage]);
+  }, [searchQuery, selected]);
 
   const filtered = productos.filter((p) => p.disponible);
+
+  // Cálculo de paginación
+  const indexOfLast = currentPage * productsPerPage;
+  const indexOfFirst = indexOfLast - productsPerPage;
+  const currentProducts = filtered.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filtered.length / productsPerPage);
 
   const selectCategory = (cat) => {
     if (!cat) {
       searchParams.delete('categoria');
       searchParams.delete('search');
-      searchParams.set('page', '0'); // Reset page
       setSearchParams(searchParams);
       return;
     }
     searchParams.delete('search');
-    searchParams.set('categoria', cat);
-    searchParams.set('page', '0'); // Reset page
-    setSearchParams(searchParams);
-  };
-
-  const handlePageChange = (newPage) => {
-    searchParams.set('page', String(newPage));
-    setSearchParams(searchParams);
+    setSearchParams({ categoria: cat });
   };
 
   if (loading) return <p className="text-white p-6">Cargando productos...</p>;
 
   return (
-    <div className="min-h-screen bg-neutral-900 text-white">
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        {/* Menú de categorías para móvil (visible solo en pantallas pequeñas) */}
-        <div className="md:hidden mb-6">
-          <h2 className="text-2xl font-bold mb-4">Categorías</h2>
-          <select 
-            onChange={(e) => selectCategory(e.target.value || null)} 
-            value={selected || ''}
-            className="w-full p-3 rounded text-white bg-neutral-800 border border-neutral-700"
-          >
-            <option value="">Todas las categorías</option>
-            {categorias.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-        </div>
+    <div className="min-h-screen bg-neutral-900 text-white flex p-6">
+      {/* Sidebar */}
+      <aside className="w-64 bg-neutral-800 p-4 rounded-lg shadow-lg sticky top-24 h-fit self-start">
+        <h3 className="text-xl font-bold mb-4">Categorías</h3>
+        <ul className="flex flex-col gap-2">
+          <li>
+            <button
+              onClick={() => selectCategory(null)}
+              className={`w-full text-left px-3 py-2 rounded cursor-pointer ${!selected && !searchQuery
+                  ? 'bg-[#EEDA00] text-black'
+                  : 'hover:bg-neutral-700'
+                }`}
+            >
+              Todas
+            </button>
+          </li>
+          {categorias.map((cat) => (
+            <li key={cat}>
+              <button
+                onClick={() => selectCategory(cat)}
+                className={`w-full text-left px-3 py-2 rounded cursor-pointer ${selected === cat
+                    ? 'bg-[#EEDA00] text-black'
+                    : 'hover:bg-neutral-700'
+                  }`}
+              >
+                {cat}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </aside>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Columna del menú lateral (sticky) */}
-          <aside className="hidden md:block md:col-span-1">
-            <div className="sticky top-28">
-              <div className="bg-neutral-800 p-4 rounded-lg shadow-lg">
-                <h3 className="text-xl font-bold mb-4">Categorías</h3>
-                <ul className="flex flex-col gap-2">
-                  <li>
-                    <button
-                      onClick={() => selectCategory(null)}
-                      className={`w-full text-left px-3 py-2 rounded transition-colors ${!selected && !searchQuery ? 'bg-yellow-400 text-black' : 'hover:bg-neutral-700'}`}
-                    >
-                      Todas
-                    </button>
-                  </li>
-                  {categorias.map(cat => (
-                    <li key={cat}>
-                      <button
-                        onClick={() => selectCategory(cat)}
-                        className={`w-full text-left px-3 py-2 rounded transition-colors ${selected === cat ? 'bg-yellow-400 text-black' : 'hover:bg-neutral-700'}`}
-                      >
-                        {cat}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+      {/* Contenido principal */}
+      <section className="ml-[2rem]">
+        <h2 className="text-2xl font-bold mb-4">
+          {searchQuery
+            ? `Resultados de búsqueda: "${searchQuery}"`
+            : selected
+              ? `Productos - ${selected}`
+              : 'Todos los productos'}
+        </h2>
+
+        {filtered.length === 0 ? (
+          <p className="text-gray-400 text-lg">No se encontraron productos</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {currentProducts.map(p => {
+                const tieneDescuento = p.descuento && p.descuento > 0;
+                const precioFinal = tieneDescuento ? p.precio * (1 - p.descuento / 100) : p.precio;
+
+                return (
+                  <ProductCard
+                    key={p.id}
+                    id={p.id}
+                    img={p.image}
+                    title={p.nombre}
+                    price={precioFinal}
+                    oldPrice={tieneDescuento ? p.precio : null}
+                  />
+                );
+              })}
             </div>
-          </aside>
 
-          {/* Columna de productos */}
-          <section className="col-span-1 md:col-span-3">
-            <h2 className="text-2xl font-bold mb-4">
-              {searchQuery 
-                ? `Resultados de búsqueda: "${searchQuery}"` 
-                : selected 
-                  ? `Productos - ${selected}` 
-                  : 'Todos los productos'}
-            </h2>
-            {filtered.length === 0 ? (
-              <p className="text-gray-400 text-lg">No se encontraron productos</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filtered.map(p => {
-                  const tieneDescuento = p.descuento && p.descuento > 0;
-                  const precioFinal = tieneDescuento ? p.precio * (1 - p.descuento / 100) : p.precio;
-                  return (
-                    <ProductCard key={p.id} id={p.id} img={p.image} title={p.nombre} price={precioFinal} oldPrice={tieneDescuento ? p.precio : null} />
-                  );
-                })}
+            {/* ✅ Paginación: solo mostrar si hay más de 16 productos */}
+            {filtered.length > productsPerPage && (
+              <div className="flex justify-center mt-6 gap-2">
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`px-3 py-1 rounded cursor-pointer ${currentPage === i + 1 ? 'bg-yellow-400 text-black' : 'bg-neutral-700 hover:bg-neutral-600'
+                      }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
               </div>
             )}
-
-            {!loading && filtered.length > 0 && (
-              <Pagination
-                currentPage={pagination.currentPage}
-                totalPages={pagination.totalPages}
-                onPageChange={handlePageChange}
-              />
-            )}
-          </section>
-        </div>
-      </div>
+          </>
+        )}
+      </section>
     </div>
   );
 }

@@ -16,14 +16,20 @@ function ProductCard({ id, img, title, price, oldPrice }) {
 
       {/* Precios y botón siempre al final */}
       <div className="flex flex-col gap-2 mt-4">
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex flex-col items-center justify-center h-12">
           {oldPrice && (
-            <p className="text-gray-400 line-through text-sm">${parseFloat(oldPrice).toFixed(2)}</p>
+            <>
+              <p className="text-gray-400 line-through text-sm">${parseFloat(oldPrice).toFixed(2)}</p>
+              <p className="text-xl font-bold text-green-400">
+                ${parseFloat(price).toFixed(2)}
+              </p>
+            </>
           )}
-          <p className={`text-xl font-bold ${oldPrice ? 'text-green-400' : 'text-white'}`}>
-            ${parseFloat(price).toFixed(2)}
-          </p>
-          <p className="text-xl font-bold text-[#EEDA00]">${price}</p>
+          {!oldPrice && (
+            <p className="text-xl font-bold text-[#EEDA00]">
+              ${parseFloat(price).toFixed(2)}
+            </p>
+          )}
         </div>
 
         <Link 
