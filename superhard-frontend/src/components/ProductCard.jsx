@@ -18,14 +18,16 @@ function ProductCard({ id, img, title, price, oldPrice }) {
       <div className="flex flex-col gap-2 mt-4">
         <div className="flex items-center justify-center gap-2">
           {oldPrice && (
-            <p className="text-gray-400 line-through text-sm">${oldPrice}</p>
+            <p className="text-gray-400 line-through text-sm">${parseFloat(oldPrice).toFixed(2)}</p>
           )}
-          <p className="text-xl font-bold text-green-400">${price}</p>
+          <p className={`text-xl font-bold ${oldPrice ? 'text-green-400' : 'text-white'}`}>
+            ${parseFloat(price).toFixed(2)}
+          </p>
         </div>
 
         <Link 
           to={`/product/${id}`}
-          className="bg-green-900 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-xl shadow-md transition-colors w-full text-center"
+          className="bg-[#EEDA00] hover:opacity-90 text-black font-bold py-2 px-4 rounded-xl shadow-md transition-colors w-full text-center"
         >
           Ver Producto
         </Link>

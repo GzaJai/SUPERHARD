@@ -69,6 +69,7 @@ export default function ProductList() {
               <th className="py-2 px-4 text-left">ID</th>
               <th className="py-2 px-4 text-left">Nombre</th>
               <th className="py-2 px-4 text-left">Precio</th>
+              <th className="py-2 px-4 text-left">Descuento</th>
               <th className="py-2 px-4 text-left">Categoría</th>
               <th className="py-2 px-4 text-left">Stock</th>
               <th className="py-2 px-4 text-left">Estado</th>
@@ -76,11 +77,25 @@ export default function ProductList() {
             </tr>
           </thead>
           <tbody>
-            {productos.map(p => (
-              <tr key={p.id} className="border-b border-neutral-700 hover:bg-neutral-700">
+            {productos.map(p => {
+              const precioFinal = p.descuento > 0 ? p.precio * (1 - p.descuento / 100) : p.precio;
+              return (
+              <tr key={p.id} className="border-b border-neutral-700 hover:bg-neutral-700 transition-colors">
                 <td className="py-2 px-4">{p.id}</td>
                 <td className="py-2 px-4">{p.nombre}</td>
-                <td className="py-2 px-4">${p.precio}</td>
+                <td className="py-2 px-4">
+                  {p.descuento > 0 ? (
+                    <div className="flex flex-col">
+                      <span className="font-bold text-green-400">${precioFinal.toFixed(2)}</span>
+                      <span className="text-xs text-gray-400 line-through">${parseFloat(p.precio).toFixed(2)}</span>
+                    </div>
+                  ) : (
+                    `$${parseFloat(p.precio).toFixed(2)}`
+                  )}
+                </td>
+                <td className="py-2 px-4">
+                  {p.descuento > 0 ? <span className="font-semibold text-yellow-400">{p.descuento}%</span> : 'N/A'}
+                </td>
                 <td className="py-2 px-4">{p.categoria}</td>
                 <td className="py-2 px-4">{p.stock}</td>
                 <td className="py-2 px-4">
@@ -110,7 +125,8 @@ export default function ProductList() {
                   </button>
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>

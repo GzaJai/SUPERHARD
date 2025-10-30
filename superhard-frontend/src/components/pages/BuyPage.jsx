@@ -121,9 +121,16 @@ const BuyPage = () => {
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem("cartItems")) || [];
     setCartItems(savedCart);
-    const subtotal = savedCart.reduce((acc, item) => acc + parseFloat(item.precio) * item.cantidad, 0);
+
+    // Calcula el total considerando los descuentos
+    const subtotal = savedCart.reduce((acc, item) => {
+      const price = parseFloat(item.precio);
+      const finalPrice = item.descuento > 0 ? price * (1 - item.descuento / 100) : price;
+      return acc + finalPrice * item.cantidad;
+    }, 0);
+
     setTotal(subtotal);
-  }, []);
+  }, []); 
 
   // ✅ NUEVO: Detectar callback de MercadoPago
   useEffect(() => {
@@ -163,7 +170,10 @@ const BuyPage = () => {
           items: cartItems.map(item => ({
             title: item.nombre,
             quantity: item.cantidad,
-            unit_price: parseFloat(item.precio),
+            // ✅ Usar el precio con descuento para la preferencia de MP
+            unit_price: item.descuento > 0 
+              ? parseFloat(item.precio) * (1 - item.descuento / 100)
+              : parseFloat(item.precio),
             currency_id: "ARS",
           })),
           back_urls: {
@@ -347,8 +357,17 @@ const BuyPage = () => {
                   <p className="font-semibold">{product.nombre}</p>
                   <p className="text-sm text-gray-400">Cantidad: {product.cantidad}</p>
                 </div>
-                <div className="font-bold text-[#EEDA00]">
-                  ${(parseFloat(product.precio) * product.cantidad).toFixed(2)}
+                <div className="font-bold text-[#EEDA00] text-right">
+                  {product.descuento > 0 ? (
+                    <>
+                      <p>${(parseFloat(product.precio) * (1 - product.descuento / 100) * product.cantidad).toFixed(2)}</p>
+                      <p className="text-sm text-gray-500 line-through font-normal">
+                        ${(parseFloat(product.precio) * product.cantidad).toFixed(2)}
+                      </p>
+                    </>
+                  ) : (
+                    <p>${(parseFloat(product.precio) * product.cantidad).toFixed(2)}</p>
+                  )}
                 </div>
               </div>
             ))}

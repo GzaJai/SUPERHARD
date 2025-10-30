@@ -235,14 +235,27 @@ const OrderSummary = () => {
                   <div>
                     <p className="font-semibold text-lg">{p.nombre}</p>
                     <p className="text-gray-400 text-sm">
-                      Cantidad: {p.cantidad} × ${parseFloat(p.precio).toFixed(2)}
+                      Cantidad: {p.cantidad} × ${ p.descuento > 0 
+                        ? (parseFloat(p.precio) * (1 - p.descuento / 100)).toFixed(2)
+                        : parseFloat(p.precio).toFixed(2) }
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-xl text-[#EEDA00]">
-                    ${(parseFloat(p.precio) * p.cantidad).toFixed(2)}
-                  </p>
+                  {p.descuento > 0 ? (
+                    <>
+                      <p className="font-bold text-xl text-green-400">
+                        ${(parseFloat(p.precio) * (1 - p.descuento / 100) * p.cantidad).toFixed(2)}
+                      </p>
+                      <p className="text-gray-500 line-through text-sm">
+                        ${(parseFloat(p.precio) * p.cantidad).toFixed(2)}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="font-bold text-xl text-[#EEDA00]">
+                      ${(parseFloat(p.precio) * p.cantidad).toFixed(2)}
+                    </p>
+                  )}
                 </div>
               </div>
             ))}

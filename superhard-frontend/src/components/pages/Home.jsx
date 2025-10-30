@@ -1,6 +1,7 @@
 import React from 'react'
 import Carousel from '../Carousel'
 import Banner from '../Banner'
+import FeaturedProducts from '../FeaturedProducts';
 import ImagenPrincipal from "../../assets/images/Imagen principal.png";
 
 const Home = () => {
@@ -10,6 +11,7 @@ const Home = () => {
       <main className="flex-grow">
         <Banner imgPath={ImagenPrincipal} />
         <Carousel />
+        <FeaturedProducts />
       </main>
     </div>
 

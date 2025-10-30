@@ -40,6 +40,7 @@ public class ProductoService {
         existente.setStock(producto.getStock());
         existente.setSocket(producto.getSocket());
         existente.setDdr(producto.getDdr());
+        existente.setDescuento(producto.getDescuento());
         
         return productoRepository.save(existente);
     }

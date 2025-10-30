@@ -9,6 +9,7 @@ export default function ProductForm() {
     marca: "",
     nombre: "",
     precio: "",
+    descuento: "",
     categoria: "",
     socket: "",
     ddr: "",
@@ -120,6 +121,16 @@ export default function ProductForm() {
           value={producto.precio}
           onChange={handleChange}
           className="p-2 rounded text-white bg-neutral-800"
+        />
+
+        <input
+          type="number"
+          name="descuento"
+          placeholder="Descuento (%)"
+          value={producto.descuento}
+          onChange={handleChange}
+          className="p-2 rounded text-white bg-neutral-800"
+          min="0"
         />
 
         {/* Select para categoría */}

@@ -102,8 +102,21 @@ const ProductDetails = () => {
               <h2 className="text-3xl md:text-4xl font-bold text-[#EEDA00]">{product.nombre}</h2>
             </div>
 
-            {/* Precio */}
-            <p className="text-4xl font-extrabold">${parseFloat(product.precio).toFixed(2)}</p>
+            {/* Precio con lógica de descuento */}
+            <div className="flex items-end gap-4">
+              {product.descuento && product.descuento > 0 ? (
+                <>
+                  <p className="text-4xl font-extrabold text-green-400">
+                    ${(product.precio * (1 - product.descuento / 100)).toFixed(2)}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-500 line-through">
+                    ${parseFloat(product.precio).toFixed(2)}
+                  </p>
+                </>
+              ) : (
+                <p className="text-4xl font-extrabold">${parseFloat(product.precio).toFixed(2)}</p>
+              )}
+            </div>
 
             {/* Envío */}
             <div className="flex items-center gap-2 text-sm text-gray-300 bg-[#2b2b2b] p-3 rounded-lg">

@@ -26,6 +26,21 @@ public class ProductoModel {
     private boolean disponible;
     private int stock;
     private String image;
-    
+    private Double descuento;
 
+    /**
+     * Calcula el precio final aplicando el descuento.
+     * Este método no se persiste en la base de datos gracias a @Transient.
+     * @return El precio con el descuento aplicado, o el precio original si no hay descuento.
+     */
+    @Transient
+    public Double getPrecioConDescuento() {
+        if (this.precio == null) {
+            return null;
+        }
+        if (this.descuento == null || this.descuento <= 0) {
+            return this.precio;
+        }
+        return this.precio * (1 - (this.descuento / 100));
+    }
 }

@@ -21,9 +21,15 @@ const ShoppingCart = () => {
       .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
-  // Calcula el total
+  // Calcula el precio final de un item, aplicando descuento si existe
+  const getFinalPrice = (item) => {
+    const price = toNumber(item.precio);
+    return item.descuento > 0 ? price * (1 - item.descuento / 100) : price;
+  };
+
+  // Calcula el total del carrito usando el precio final
   const total = cart.reduce(
-    (acc, item) => acc + toNumber(item.precio) * item.cantidad,
+    (acc, item) => acc + getFinalPrice(item) * item.cantidad,
     0
   );
 
@@ -50,8 +56,8 @@ const ShoppingCart = () => {
             </div>
           ) : (
             cart.map((product) => {
-              const price = toNumber(product.precio);
-              const subtotal = price * product.cantidad;
+              const finalPrice = getFinalPrice(product);
+              const subtotal = finalPrice * product.cantidad;
 
               return (
                 <div
@@ -71,9 +77,17 @@ const ShoppingCart = () => {
                   <div className="flex flex-col text-white font-medium flex-1 gap-3">
                     <p className="text-lg font-semibold">{product.nombre}</p>
                     <p className="text-sm opacity-90">
-                      <span className="font-bold">
-                        ${formatNumber(price)}
-                      </span>{" "}
+                      {product.descuento > 0 ? (
+                        <>
+                          <span className="font-bold text-green-400">${formatNumber(finalPrice)}</span>
+                          <span className="line-through text-gray-400 ml-2">${formatNumber(product.precio)}</span>
+                        </>
+                      ) : (
+                        <span className="font-bold">
+                          ${formatNumber(finalPrice)}
+                        </span>
+                      )}
+                      {" "}
                       x unidad
                     </p>
                     <div className="flex bg-white text-black rounded-lg w-fit items-center">
