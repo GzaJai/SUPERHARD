@@ -7,32 +7,27 @@ const ShoppingCart = () => {
     useContext(CartContext);
   const navigate = useNavigate();
 
-  // Limpia y convierte el precio a número
-  const toNumber = (precio) => {
-    if (!precio) return 0;
-    const num = Number(precio.toString().replace(/[^0-9.]/g, ""));
-    return isNaN(num) ? 0 : num;
-  };
+  // ✅ Formateo de precios
+  const formatPrice = (num) =>
+    num.toLocaleString("es-AR", {
+      style: "currency",
+      currency: "ARS",
+      minimumFractionDigits: 2,
+    });
 
-  // Formatea números con separadores
-  const formatNumber = (num) => {
-    return toNumber(num)
-      .toFixed(2)
-      .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  };
-
-  // Calcula el precio final de un item, aplicando descuento si existe
+  // ✅ Precio final con descuento
   const getFinalPrice = (item) => {
-    const price = toNumber(item.precio);
+    const price = Number(item.precio) || 0;
     return item.descuento > 0 ? price * (1 - item.descuento / 100) : price;
   };
 
-  // Calcula el total del carrito usando el precio final
+  // ✅ Total del carrito
   const total = cart.reduce(
     (acc, item) => acc + getFinalPrice(item) * item.cantidad,
     0
   );
 
+  // ✅ Compra
   const handleBuy = () => {
     if (cart.length === 0) return;
     localStorage.setItem("cartItems", JSON.stringify(cart));
@@ -40,9 +35,22 @@ const ShoppingCart = () => {
     navigate("/buy");
   };
 
+  // ✅ No baja de 1
+  const handleRemove = (product) => {
+    if (product.cantidad > 1) {
+      removeFromCart(product);
+    }
+  };
+
+  // ✅ Eliminar producto completo
+  const handleDelete = (productId) => {
+    deleteFromCart(productId);
+  };
+  
+
   return (
     <div className="bg-[#494949] min-h-screen pt-[2rem] pb-[6rem] flex flex-col md:flex-row gap-6 px-6">
-      {/* Contenedor principal del carrito */}
+      {/* Contenedor principal */}
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col w-full max-w-4xl mx-auto bg-[#646464] rounded-2xl gap-6 p-6 shadow-md">
           {cart.length === 0 ? (
@@ -73,31 +81,61 @@ const ShoppingCart = () => {
                     />
                   </div>
 
-                  {/* Info y contador */}
+                  {/* Info */}
                   <div className="flex flex-col text-white font-medium flex-1 gap-3">
                     <p className="text-lg font-semibold">{product.nombre}</p>
                     <p className="text-sm opacity-90">
                       {product.descuento > 0 ? (
                         <>
-                          <span className="font-bold text-green-400">${formatNumber(finalPrice)}</span>
-                          <span className="line-through text-gray-400 ml-2">${formatNumber(product.precio)}</span>
+                          <span className="font-bold text-green-400">
+                            {formatPrice(finalPrice)}
+                          </span>
+                          <span className="line-through text-gray-400 ml-2">
+                            {formatPrice(product.precio)}
+                          </span>
                         </>
                       ) : (
                         <span className="font-bold">
-                          ${formatNumber(finalPrice)}
+                          {formatPrice(finalPrice)}
                         </span>
                       )}
-                      {" "}
-                      x unidad
+                      {" x unidad"}
                     </p>
-                    <div className="flex bg-white text-black rounded-lg w-fit items-center">
+
+                    {/* Contador */}
+                    <div className="flex bg-white text-black rounded-lg w-fit items-center relative">
+                      {/* Botón restar */}
                       <button
-                        onClick={() => removeFromCart(product)}
-                        className="px-4 py-1 font-black bg-[#EEDA00] rounded-l-lg cursor-pointer hover:opacity-90"
+                        onClick={() => handleRemove(product)}
+                        disabled={product.cantidad === 1}
+                        className={`relative px-4 py-1 font-black rounded-l-lg transition-all duration-200 flex items-center justify-center ${
+                          product.cantidad === 1
+                            ? "bg-[#bfb200] cursor-not-allowed"
+                            : "bg-[#EEDA00] hover:opacity-90 cursor-pointer"
+                        }`}
                       >
-                        -
+                        <span className="z-10">-</span>
+
+                        {/* Ícono prohibido al hover */}
+                        {product.cantidad === 1 && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="black"
+                            strokeWidth="2"
+                            className="absolute w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                          >
+                            <circle cx="12" cy="12" r="9" />
+                            <line x1="5" y1="19" x2="19" y2="5" />
+                          </svg>
+                        )}
                       </button>
+
+                      {/* Cantidad */}
                       <p className="px-4">{product.cantidad}</p>
+
+                      {/* Botón sumar */}
                       <button
                         onClick={() => addToCart(product)}
                         className="px-4 py-1 font-black bg-[#EEDA00] rounded-r-lg cursor-pointer hover:opacity-90"
@@ -107,10 +145,10 @@ const ShoppingCart = () => {
                     </div>
                   </div>
 
-                  {/* Eliminar producto */}
+                  {/* Botón eliminar producto */}
                   <button
-                    onClick={() => removeFromCart(product)}
-                    className="cursor-pointer hover:opacity-80"
+                    onClick={() => handleDelete(product.id)}
+                    className="cursor-pointer hover:opacity-80 transition-opacity duration-200"
                     title="Eliminar producto"
                   >
                     <svg
@@ -126,7 +164,7 @@ const ShoppingCart = () => {
 
                   {/* Subtotal */}
                   <div className="font-bold text-lg text-white bg-[#2F2F2F] px-4 py-2 rounded-lg shadow-inner">
-                    ${formatNumber(subtotal)}
+                    {formatPrice(subtotal)}
                   </div>
                 </div>
               );
@@ -135,14 +173,14 @@ const ShoppingCart = () => {
         </div>
       </div>
 
-      {/* Total y comprar */}
+      {/* Total y botones */}
       {cart.length > 0 && (
         <>
           {/* Desktop */}
           <div className="hidden md:flex flex-col sticky top-[7rem] w-[300px] h-fit self-start">
             <div className="flex flex-col justify-between bg-[#555555] rounded-xl p-5 shadow-lg gap-4">
               <div className="text-white font-bold text-xl">
-                Total: ${formatNumber(total)}
+                Total: {formatPrice(total)}
               </div>
               <button
                 onClick={handleBuy}
@@ -163,7 +201,7 @@ const ShoppingCart = () => {
           <div className="md:hidden fixed bottom-0 left-0 w-full px-4 pb-4 bg-transparent">
             <div className="flex justify-between bg-[#555555] rounded-xl p-4 shadow-lg">
               <div className="text-white font-bold text-lg">
-                Total: ${formatNumber(total)}
+                Total: {formatPrice(total)}
               </div>
               <button
                 onClick={handleBuy}

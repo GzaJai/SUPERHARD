@@ -21,16 +21,12 @@ export function CartProvider({ children }) {
     localStorage.setItem("cart", JSON.stringify(cart));
     const totalUnidades = cart.reduce((acc, item) => acc + item.cantidad, 0);
     setCartQuantity(totalUnidades);
-    localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-    // 🔹 Limpiar carrito completo
+  // 🔹 Limpiar carrito completo
   const clearCart = () => {
     setCart([]);
   };
-
-  
-
 
   // 🔹 Agregar producto al carrito
   const addToCart = (product, cantidad = 1) => {
@@ -47,7 +43,12 @@ export function CartProvider({ children }) {
     });
   };
 
-  // 🔹 Quitar producto del carrito
+  // 🔹 Eliminar producto completamente del carrito
+  const deleteFromCart = (id) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+  };
+
+  // 🔹 Quitar una unidad del producto (sin bajar de 1)
   const removeFromCart = (product) => {
     setCart((prevCart) => {
       const existing = prevCart.find((item) => item.id === product.id);
@@ -66,7 +67,16 @@ export function CartProvider({ children }) {
   };
 
   return (
-    <CartContext.Provider value={{ cart, cartQuantity, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        cartQuantity,
+        addToCart,
+        removeFromCart,
+        deleteFromCart,
+        clearCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
