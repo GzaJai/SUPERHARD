@@ -16,6 +16,10 @@ import UserList from "../components/admin/UserList";
 import PublicLayout from "../layouts/PublicLayout";
 import SalesList from "../components/admin/SalesList";
 import BuildPC from "../components/pages/BuildPC";
+import FAQ from "../components/pages/FAQ";
+import Sucursales from "../components/pages/Sucursales";
+import Contact from "../components/pages/Contact";
+import TrabajaConNosotros from "../components/pages/TrabajaConNosotros";
 
 export default function AppRouter({ user, setUser }) {
   return (
@@ -32,6 +36,10 @@ export default function AppRouter({ user, setUser }) {
               <Route path='/buy' element={<BuyPage />} />
               <Route path='/order-summary' element={<OrderSummary />} />
               <Route path="/build-pc" element={<BuildPC />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route  path="/sucursales" element={<Sucursales/>} />
+              <Route path="/contact" element={<Contact/>} />
+              <Route path="/trabajo" element={<TrabajaConNosotros/>} />
             </Route>
             
             {/* Admin */}

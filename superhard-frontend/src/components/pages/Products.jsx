@@ -38,8 +38,7 @@ export default function Products() {
   // Cargar productos
   useEffect(() => {
     let mounted = true;
-    // Scroll to top cuando cambia la página o los filtros
-    window.scrollTo(0, 0);
+    window.scrollTo(0, 0); // subir al top cuando cambia el filtro
 
     const loadProductos = async () => {
       try {
@@ -56,7 +55,7 @@ export default function Products() {
 
         if (!mounted) return;
         setProductos(prods || []);
-        setCurrentPage(1); // resetear a la primera página al cambiar filtro
+        setCurrentPage(1); // resetear a primera página al cambiar filtros
       } catch (err) {
         console.error('Error cargando productos', err);
       } finally {
@@ -65,9 +64,9 @@ export default function Products() {
     };
     loadProductos();
     return () => (mounted = false);
-  }, [searchQuery, selected, currentPage]);
+  }, [searchQuery, selected]); // 👈 QUITADO currentPage
 
-  const filtered = productos.filter((p) => p.disponible);
+  const filtered = productos.filter(p => p.disponible);
 
   // Cálculo de paginación
   const indexOfLast = currentPage * productsPerPage;
@@ -97,10 +96,11 @@ export default function Products() {
           <li>
             <button
               onClick={() => selectCategory(null)}
-              className={`w-full text-left px-3 py-2 rounded cursor-pointer ${!selected && !searchQuery
+              className={`w-full text-left px-3 py-2 rounded cursor-pointer ${
+                !selected && !searchQuery
                   ? 'bg-[#EEDA00] text-black'
                   : 'hover:bg-neutral-700'
-                }`}
+              }`}
             >
               Todas
             </button>
@@ -109,10 +109,11 @@ export default function Products() {
             <li key={cat}>
               <button
                 onClick={() => selectCategory(cat)}
-                className={`w-full text-left px-3 py-2 rounded cursor-pointer ${selected === cat
+                className={`w-full text-left px-3 py-2 rounded cursor-pointer ${
+                  selected === cat
                     ? 'bg-[#EEDA00] text-black'
                     : 'hover:bg-neutral-700'
-                  }`}
+                }`}
               >
                 {cat}
               </button>
@@ -127,8 +128,8 @@ export default function Products() {
           {searchQuery
             ? `Resultados de búsqueda: "${searchQuery}"`
             : selected
-              ? `Productos - ${selected}`
-              : 'Todos los productos'}
+            ? `Productos - ${selected}`
+            : 'Todos los productos'}
         </h2>
 
         {filtered.length === 0 ? (
@@ -136,9 +137,11 @@ export default function Products() {
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {currentProducts.map(p => {
+              {currentProducts.map((p) => {
                 const tieneDescuento = p.descuento && p.descuento > 0;
-                const precioFinal = tieneDescuento ? p.precio * (1 - p.descuento / 100) : p.precio;
+                const precioFinal = tieneDescuento
+                  ? p.precio * (1 - p.descuento / 100)
+                  : p.precio;
 
                 return (
                   <ProductCard
@@ -153,15 +156,21 @@ export default function Products() {
               })}
             </div>
 
-            {/* ✅ Paginación: solo mostrar si hay más de 16 productos */}
+            {/* ✅ Paginación solo si hay más de 16 productos */}
             {filtered.length > productsPerPage && (
               <div className="flex justify-center mt-6 gap-2">
                 {Array.from({ length: totalPages }, (_, i) => (
                   <button
                     key={i}
-                    onClick={() => setCurrentPage(i + 1)}
-                    className={`px-3 py-1 rounded cursor-pointer ${currentPage === i + 1 ? 'bg-yellow-400 text-black' : 'bg-neutral-700 hover:bg-neutral-600'
-                      }`}
+                    onClick={() => {
+                      setCurrentPage(i + 1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className={`px-3 py-1 rounded cursor-pointer ${
+                      currentPage === i + 1
+                        ? 'bg-yellow-400 text-black'
+                        : 'bg-neutral-700 hover:bg-neutral-600'
+                    }`}
                   >
                     {i + 1}
                   </button>
