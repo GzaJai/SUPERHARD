@@ -203,9 +203,12 @@ function Header({ user, setUser }) {
             )}
           </div>
 
-          <button className="text-[#EEDA00] px-4 text-lg md:border-r hover:cursor-pointer">
+          <Link
+            to="/products?ofertas=true"
+            className="text-[#EEDA00] px-4 text-lg md:border-r hover:cursor-pointer"
+          >
             OFERTAS
-          </button>
+          </Link>
 
           {/* Resto de categorías */}
           {categories.map((c) => (

@@ -11,6 +11,7 @@ export default function Products() {
 
   const selected = searchParams.get('categoria') || null;
   const searchQuery = searchParams.get('search') || null;
+  const onSale = searchParams.get('ofertas') === 'true';
 
   // Paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,7 +39,8 @@ export default function Products() {
   // Cargar productos
   useEffect(() => {
     let mounted = true;
-    window.scrollTo(0, 0); // subir al top cuando cambia el filtro
+    // Scroll to top cuando cambia la página o los filtros
+    window.scrollTo(0, 0);
 
     const loadProductos = async () => {
       try {
@@ -53,9 +55,14 @@ export default function Products() {
           prods = await api.getProductos();
         }
 
+        // Si el filtro de ofertas está activo, filtramos los productos
+        if (onSale) {
+          prods = prods.filter(p => p.descuento && p.descuento > 0);
+        }
+
         if (!mounted) return;
         setProductos(prods || []);
-        setCurrentPage(1); // resetear a primera página al cambiar filtros
+        setCurrentPage(1); // resetear a la primera página al cambiar filtro
       } catch (err) {
         console.error('Error cargando productos', err);
       } finally {
@@ -64,9 +71,9 @@ export default function Products() {
     };
     loadProductos();
     return () => (mounted = false);
-  }, [searchQuery, selected]); // 👈 QUITADO currentPage
+  }, [searchQuery, selected, onSale]);
 
-  const filtered = productos.filter(p => p.disponible);
+  const filtered = productos.filter((p) => p.disponible);
 
   // Cálculo de paginación
   const indexOfLast = currentPage * productsPerPage;
@@ -78,10 +85,12 @@ export default function Products() {
     if (!cat) {
       searchParams.delete('categoria');
       searchParams.delete('search');
+      searchParams.delete('ofertas');
       setSearchParams(searchParams);
       return;
     }
     searchParams.delete('search');
+    searchParams.delete('ofertas');
     setSearchParams({ categoria: cat });
   };
 
@@ -96,11 +105,10 @@ export default function Products() {
           <li>
             <button
               onClick={() => selectCategory(null)}
-              className={`w-full text-left px-3 py-2 rounded cursor-pointer ${
-                !selected && !searchQuery
+              className={`w-full text-left px-3 py-2 rounded cursor-pointer ${!selected && !searchQuery && !onSale
                   ? 'bg-[#EEDA00] text-black'
                   : 'hover:bg-neutral-700'
-              }`}
+                }`}
             >
               Todas
             </button>
@@ -109,11 +117,10 @@ export default function Products() {
             <li key={cat}>
               <button
                 onClick={() => selectCategory(cat)}
-                className={`w-full text-left px-3 py-2 rounded cursor-pointer ${
-                  selected === cat
+                className={`w-full text-left px-3 py-2 rounded cursor-pointer ${selected === cat
                     ? 'bg-[#EEDA00] text-black'
                     : 'hover:bg-neutral-700'
-                }`}
+                  }`}
               >
                 {cat}
               </button>
@@ -126,10 +133,12 @@ export default function Products() {
       <section className="ml-[2rem]">
         <h2 className="text-2xl font-bold mb-4">
           {searchQuery
-            ? `Resultados de búsqueda: "${searchQuery}"`
-            : selected
-            ? `Productos - ${selected}`
-            : 'Todos los productos'}
+            ? `Resultados para: "${searchQuery}"`
+            : onSale
+              ? 'Productos en Oferta'
+              : selected
+                ? `Productos - ${selected}`
+                : 'Todos los productos'}
         </h2>
 
         {filtered.length === 0 ? (
@@ -137,11 +146,9 @@ export default function Products() {
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {currentProducts.map((p) => {
+              {currentProducts.map(p => {
                 const tieneDescuento = p.descuento && p.descuento > 0;
-                const precioFinal = tieneDescuento
-                  ? p.precio * (1 - p.descuento / 100)
-                  : p.precio;
+                const precioFinal = tieneDescuento ? p.precio * (1 - p.descuento / 100) : p.precio;
 
                 return (
                   <ProductCard
@@ -156,21 +163,15 @@ export default function Products() {
               })}
             </div>
 
-            {/* ✅ Paginación solo si hay más de 16 productos */}
+            {/* ✅ Paginación: solo mostrar si hay más de 16 productos */}
             {filtered.length > productsPerPage && (
               <div className="flex justify-center mt-6 gap-2">
                 {Array.from({ length: totalPages }, (_, i) => (
                   <button
                     key={i}
-                    onClick={() => {
-                      setCurrentPage(i + 1);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className={`px-3 py-1 rounded cursor-pointer ${
-                      currentPage === i + 1
-                        ? 'bg-yellow-400 text-black'
-                        : 'bg-neutral-700 hover:bg-neutral-600'
-                    }`}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`px-3 py-1 rounded cursor-pointer ${currentPage === i + 1 ? 'bg-yellow-400 text-black' : 'bg-neutral-700 hover:bg-neutral-600'
+                      }`}
                   >
                     {i + 1}
                   </button>
